@@ -14,6 +14,10 @@ export async function POST(request: Request) {
     if (target === "hero" || target === "logo") {
       const key = target === "hero" ? "hero_image" : "logo_url";
       await sql`INSERT INTO site_settings (key,value) VALUES (${key},${publicUrl}) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=now()`;
+    } else if (target.startsWith("project:")) {
+      const projectId = target.slice("project:".length);
+      if (!projectId || projectId.startsWith("draft-")) return NextResponse.json({ ok: true, publicUrl, mode: "demo" });
+      await sql`UPDATE projects SET image_url=${publicUrl} WHERE id=${projectId}`;
     } else {
       await sql`INSERT INTO site_images (file_name,public_url,alt_text,section) VALUES (${file.name},${publicUrl},${file.name},${target})`;
     }

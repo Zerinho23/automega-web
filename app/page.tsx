@@ -11,9 +11,9 @@ const defaultServices = [
 ];
 
 const defaultProjects = [
-  { title: "Conificación vial", detail: "Obras urbanas", crop: "gallery-one" },
-  { title: "Señalización temporal", detail: "Desvíos y cortes de tránsito", crop: "gallery-two" },
-  { title: "Control del tránsito", detail: "Apoyo en faenas", crop: "gallery-three" },
+  { title: "Conificación vial", detail: "Obras urbanas", crop: "gallery-one", image_url: "" },
+  { title: "Señalización temporal", detail: "Desvíos y cortes de tránsito", crop: "gallery-two", image_url: "" },
+  { title: "Control del tránsito", detail: "Apoyo en faenas", crop: "gallery-three", image_url: "" },
 ];
 
 function Logo({ inverse = false, logoUrl = "" }: { inverse?: boolean; logoUrl?: string }) {
@@ -30,13 +30,13 @@ export default function Home() {
   const [formState, setFormState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState(defaultProjects);
-  const [site, setSite] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 XXXX XXXX", email:"contacto@automega.cl", coverage:"Concepción y toda la Región del Biobío", hero_image:"", logo_url:"" });
+  const [site, setSite] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"contacto@automega.cl", coverage:"Concepción y toda la Región del Biobío", hero_image:"", logo_url:"" });
 
   useEffect(() => {
     fetch("/api/site").then(response => response.json()).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
       if (settings) setSite(current => ({ ...current, ...settings }));
       if (remoteServices?.length) setServices(remoteServices.map((item: { title:string; description:string }, index:number) => ({ icon:[TrafficCone,Construction,HardHat][index%3], title:item.title, text:item.description })));
-      if (remoteProjects?.length) setProjects(remoteProjects.map((item: { title:string; description:string }, index:number) => ({ title:item.title, detail:item.description, crop:["gallery-one","gallery-two","gallery-three"][index%3] })));
+      if (remoteProjects?.length) setProjects(remoteProjects.map((item: { title:string; description:string; image_url?:string }, index:number) => ({ title:item.title, detail:item.description, crop:["gallery-one","gallery-two","gallery-three"][index%3], image_url:item.image_url })));
     }).catch(() => undefined);
   }, []);
 
@@ -108,7 +108,7 @@ export default function Home() {
 
       <section className="section" id="proyectos">
         <div className="section-heading split-heading"><div><div className="eyebrow">Nuestros proyectos</div><h2>Trabajos realizados</h2></div><a href="#contacto" className="button button-white">Ver más proyectos <ChevronRight size={18} /></a></div>
-        <div className="project-grid">{projects.map((project, index) => <article className="project-card" key={project.title}><div className={`photo-crop project-photo ${project.crop}`}><img src={`/images/${index === 0 ? "vial.png" : index === 1 ? "vial2.png" : "vial3.png"}`} alt="" /></div><div className="project-info"><span><TrafficCone size={20} /></span><div><h3>{project.title}</h3><p>{project.detail}</p></div><b>0{index + 1}</b></div></article>)}</div>
+        <div className="project-grid">{projects.map((project, index) => <article className="project-card" key={project.title}><div className={`photo-crop project-photo ${project.crop}`}><img src={project.image_url || `/images/${index === 0 ? "vial.png" : index === 1 ? "vial2.png" : "vial3.png"}`} alt="" /></div><div className="project-info"><span><TrafficCone size={20} /></span><div><h3>{project.title}</h3><p>{project.detail}</p></div><b>0{index + 1}</b></div></article>)}</div>
       </section>
 
       <section className="coverage" id="cobertura"><div className="coverage-copy"><div className="eyebrow light">Nuestra cobertura</div><h2>Cobertura en la <span>Región del Biobío</span></h2><p>Brindamos soluciones de seguridad vial en {site.coverage}, acompañando obras, faenas y desvíos.</p></div><div className="coverage-place"><MapPin /><strong>Concepción</strong><span>Región del Biobío</span></div></section>
@@ -128,7 +128,7 @@ export default function Home() {
       </section>
 
       <footer><div className="footer-main"><Logo /><nav>{[["Inicio", "inicio"], ["Nosotros", "nosotros"], ["Servicios", "servicios"], ["Cobertura", "cobertura"], ["Proyectos", "proyectos"], ["Contacto", "contacto"]].map(([label, id]) => <a key={label} href={`#${id}`}>{label}</a>)}</nav><span className="location-pill"><MapPin size={14} /> Concepción · Región del Biobío</span></div><div className="footer-bottom"><span>© {new Date().getFullYear()} AUTOMEGA. Todos los derechos reservados.</span><span>Términos de uso &nbsp; | &nbsp; Privacidad</span></div></footer>
-      <a className="whatsapp" href="https://wa.me/56900000000" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp"><MessageCircle /></a>
+      <a className="whatsapp" href="https://wa.me/56966473375" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp"><MessageCircle /></a>
     </main>
   );
 }
