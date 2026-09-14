@@ -36,10 +36,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <button className="logout" onClick={signOut}><LogOut /> Cerrar sesión</button>
       </aside>
       <div className="admin-main">
-        <header className="admin-topbar"><button className="admin-menu" onClick={() => setOpen(true)}><Menu /></button><strong>Panel administrativo</strong><div><Bell /><span /> <i>AM</i><b>Administrador</b></div></header>
+        <header className="admin-topbar"><button className="admin-menu" onClick={() => setOpen(true)}><Menu /></button><strong>Panel administrativo</strong><div><a href="/" target="_blank" className="admin-view-site"><ExternalLink /> Ver sitio web</a><Bell /><span /> <i>AM</i><b>Administrador</b></div></header>
         <div className="admin-content">{children}</div>
       </div>
-      <a href="/" target="_blank" className="admin-view-site"><ExternalLink /> Ver sitio web</a>
     </div>
   );
 }
