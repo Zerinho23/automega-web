@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const { email, password } = (await request.json()) as { email?: string; password?: string };
-  if (email !== "admin@automega.cl" || password !== "demo1234") return NextResponse.json({ error: "Credenciales incorrectas" }, { status: 401 });
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword) return NextResponse.json({ error: "Configura ADMIN_EMAIL y ADMIN_PASSWORD en .env.local" }, { status: 503 });
+  if (email !== adminEmail || password !== adminPassword) return NextResponse.json({ error: "Credenciales incorrectas" }, { status: 401 });
   const response = NextResponse.json({ ok: true });
   response.cookies.set("automega_demo_admin", "active", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 8 });
   return response;

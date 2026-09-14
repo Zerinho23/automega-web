@@ -3,12 +3,6 @@ import { ArrowRight, FileText, FolderKanban, HardHat, Image as ImageIcon, Mail, 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const recent = [
-  ["Constructora Sur", "Conificación vial", "Concepción", "14 sep 2026", "Nueva", "new"],
-  ["Obras del Biobío", "Señalización temporal", "San Pedro", "13 sep 2026", "Revisada", "reviewed"],
-  ["Empresa Ejemplo", "Control del tránsito", "Concepción", "12 sep 2026", "Contactada", "contacted"],
-];
-
 export default function AdminDashboard() {
   const [data,setData] = useState<{counts:{newQuotes:number;projects:number;services:number;images:number};recent:any[];settings:Record<string,string>}>({counts:{newQuotes:0,projects:0,services:0,images:0},recent:[],settings:{}});
   const [loading,setLoading] = useState(true);

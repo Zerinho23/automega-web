@@ -2,7 +2,6 @@
 
 import { ArrowRight, CalendarDays, CheckCircle2, ChevronRight, ClipboardList, Construction, HardHat, Mail, MapPin, Menu, MessageCircle, Phone, TrafficCone, Users, X, Zap } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 const defaultServices = [
   { icon: TrafficCone, title: "Conificación vial", text: "Instalación y retiro de conos, delineadores y elementos de canalización para obras y desvíos." },
