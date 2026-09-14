@@ -13,8 +13,8 @@ export async function POST(request: Request) {
   const publicUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
   if (!sql) return NextResponse.json({ ok: true, publicUrl, mode: "demo" });
   try {
-    if (target === "hero" || target === "logo") {
-      const key = target === "hero" ? "hero_image" : "logo_url";
+    if (["hero", "logo", "about"].includes(target)) {
+      const key = target === "hero" ? "hero_image" : target === "logo" ? "logo_url" : "about_image";
       await sql`INSERT INTO site_settings (key,value) VALUES (${key},${publicUrl}) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=now()`;
     } else if (target.startsWith("project:")) {
       const projectId = target.slice("project:".length);

@@ -30,7 +30,7 @@ export default function Home() {
   const [formState, setFormState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState(defaultProjects);
-  const [site, setSite] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"contacto@automega.cl", coverage:"Concepción y toda la Región del Biobío", hero_image:"", logo_url:"" });
+  const [site, setSite] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"contacto@automega.cl", coverage:"Concepción y toda la Región del Biobío", hero_image:"", about_image:"", logo_url:"" });
 
   useEffect(() => {
     try { const cached = JSON.parse(localStorage.getItem("automega_site_settings") || "{}"); if (cached && typeof cached === "object") setSite(current => ({ ...current, ...cached })); } catch {}
@@ -99,7 +99,7 @@ export default function Home() {
 
       <section className="section about-grid" id="nosotros">
         <div className="about-copy"><div className="eyebrow">Sobre AUTOMEGA</div><h2>{site.about_title === "Seguridad vial para cada trabajo" ? <>Seguridad vial para <span>cada trabajo</span></> : site.about_title}</h2><p>En AUTOMEGA entregamos servicios de conificación, señalización temporal y control del tránsito para obras, faenas y desvíos en Concepción y distintas ciudades de la Región del Biobío.</p><p>Contamos con equipos certificados y una operación orientada a la seguridad, para que cada proyecto se desarrolle de forma eficiente y segura.</p><a className="button button-yellow" href="#contacto">Conocer más sobre nosotros <ChevronRight size={18} /></a></div>
-        <div className="photo-crop about-photo" role="img" aria-label="Conificación de una vía urbana"><img src="/images/vial2.png" alt="" /></div>
+        <div className="photo-crop about-photo" role="img" aria-label="Conificación de una vía urbana"><img src={site.about_image || "/images/vial2.png"} alt="" /></div>
       </section>
 
       <section className="section process-section">
