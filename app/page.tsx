@@ -33,10 +33,11 @@ export default function Home() {
   const [site, setSite] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 XXXX XXXX", email:"contacto@automega.cl", coverage:"Concepción y toda la Región del Biobío", hero_image:"", logo_url:"" });
 
   useEffect(() => {
-    const supabase = createClient(); if (!supabase) return;
-    supabase.from("site_settings").select("key,value").then(({data}) => { if(data) setSite(current => ({...current,...Object.fromEntries(data.map(row=>[row.key,row.value]))})); });
-    supabase.from("services").select("title,description,icon").eq("visible",true).order("sort_order").then(({data}) => { if(data?.length) setServices(data.map((item,index)=>({icon:[TrafficCone,Construction,HardHat][index%3],title:item.title,text:item.description}))); });
-    supabase.from("projects").select("title,description").eq("visible",true).order("sort_order").then(({data}) => { if(data?.length) setProjects(data.map((item,index)=>({title:item.title,detail:item.description,crop:["gallery-one","gallery-two","gallery-three"][index%3]}))); });
+    fetch("/api/site").then(response => response.json()).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
+      if (settings) setSite(current => ({ ...current, ...settings }));
+      if (remoteServices?.length) setServices(remoteServices.map((item: { title:string; description:string }, index:number) => ({ icon:[TrafficCone,Construction,HardHat][index%3], title:item.title, text:item.description })));
+      if (remoteProjects?.length) setProjects(remoteProjects.map((item: { title:string; description:string }, index:number) => ({ title:item.title, detail:item.description, crop:["gallery-one","gallery-two","gallery-three"][index%3] })));
+    }).catch(() => undefined);
   }, []);
 
   useEffect(() => {

@@ -65,9 +65,15 @@ export default function AdminWorkspace({ section }: { section: string }) {
   }
   async function uploadImage(file?:File, target="gallery") {
     if(!file)return; setLoading(true);
-    if(supabase){const path=`${target}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"-")}`;const {error}=await supabase.storage.from("site-images").upload(path,file);if(error){toast.error(error.message);setLoading(false);return;}const {data}=supabase.storage.from("site-images").getPublicUrl(path);const {data:row,error:insertError}=await supabase.from("site_images").insert({file_name:file.name,storage_path:path,public_url:data.publicUrl,alt_text:file.name,section:target,visible:true}).select().single();if(insertError){toast.error(insertError.message);setLoading(false);return;}setItems(list=>[{...row,title:row.alt_text,description:row.file_name,visible:row.visible,sort_order:0,image_url:row.public_url},...list]);if(target!=="gallery"){const key=target==="hero"?"hero_image":"logo_url";setSettings(current=>({...current,[key]:data.publicUrl}));await supabase.from("site_settings").upsert({key,value:data.publicUrl},{onConflict:"key"});}}
-    else setItems(list=>[{id:`image-${Date.now()}`,title:file.name,description:"Imagen cargada en modo demostración",visible:true,sort_order:0,image_url:URL.createObjectURL(file)},...list]);
-    setLoading(false);toast.success("Imagen cargada correctamente");
+    try {
+      const form = new FormData(); form.append("file", file); form.append("target", target);
+      const response = await fetch("/api/upload", { method:"POST", body:form });
+      const result = await response.json() as { error?: string; publicUrl?: string }; if (!response.ok) throw new Error(result.error || "No fue posible cargar la imagen");
+      const imageUrl = String(result.publicUrl); setItems(list=>[{id:`image-${Date.now()}`,title:file.name,description:"Imagen guardada en Neon",visible:true,sort_order:0,image_url:imageUrl},...list]);
+      if(target!=="gallery"){const key=target==="hero"?"hero_image":"logo_url";setSettings(current=>({...current,[key]:imageUrl}));}
+      toast.success("Imagen guardada correctamente");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "No fue posible guardar la imagen"); }
+    setLoading(false);
   }
   async function changePassword(form:FormData){const password=String(form.get("password"));if(password.length<8){toast.error("La contraseña debe tener al menos 8 caracteres");return;}if(supabase){const{error}=await supabase.auth.updateUser({password});if(error){toast.error(error.message);return;}}toast.success("Contraseña actualizada");}
 
