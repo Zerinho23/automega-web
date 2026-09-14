@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   if (!sql) return NextResponse.json({ settings: {}, services: [], projects: [] });
   try {
@@ -16,6 +18,6 @@ export async function GET() {
       { title:"Apoyo en faena", description:"Control del tránsito", location:"Talcahuano" },
     ];
     const projectRows = (projects.length ? projects : fallbackProjects).map((project: any, index: number) => ({ ...project, image_url: project.image_url || settingsMap[`project_image_project-${index + 1}`] || null }));
-    return NextResponse.json({ settings: settingsMap, services, projects: projectRows });
+    return NextResponse.json({ settings: settingsMap, services, projects: projectRows }, { headers: { "Cache-Control": "no-store, max-age=0" } });
   } catch { return NextResponse.json({ settings: {}, services: [], projects: [] }); }
 }

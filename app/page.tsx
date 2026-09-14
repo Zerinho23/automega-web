@@ -34,10 +34,10 @@ export default function Home() {
 
   useEffect(() => {
     try { const cached = JSON.parse(localStorage.getItem("automega_site_settings") || "{}"); if (cached && typeof cached === "object") setSite(current => ({ ...current, ...cached })); } catch {}
-    fetch("/api/site").then(response => response.json()).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
+    fetch("/api/site", { cache: "no-store" }).then(response => response.json()).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
       if (settings) setSite(current => { const next = { ...current, ...settings }; try { localStorage.setItem("automega_site_settings", JSON.stringify(next)); } catch {} return next; });
       if (remoteServices?.length) setServices(remoteServices.map((item: { title:string; description:string }, index:number) => ({ icon:[TrafficCone,Construction,HardHat][index%3], title:item.title, text:item.description })));
-      if (remoteProjects?.length) setProjects(remoteProjects.map((item: { title:string; description:string; image_url?:string }, index:number) => ({ title:item.title, detail:item.description, crop:["gallery-one","gallery-two","gallery-three"][index%3], image_url:item.image_url })));
+      if (remoteProjects?.length) { let localImages: Record<string,string> = {}; try { localImages = JSON.parse(localStorage.getItem("automega_project_images") || "{}"); } catch {} setProjects(remoteProjects.map((item: { title:string; description:string; image_url?:string }, index:number) => ({ title:item.title, detail:item.description, crop:["gallery-one","gallery-two","gallery-three"][index%3], image_url:item.image_url || localImages[`project-${index+1}`] || "" }))); }
     }).catch(() => undefined);
   }, []);
 
