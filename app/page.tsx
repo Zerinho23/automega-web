@@ -83,7 +83,7 @@ export default function Home() {
           <p>{site.hero_text}</p>
           <div className="hero-actions"><a className="button button-yellow" href="#contacto">Solicitar cotización <ChevronRight size={20} /></a><a className="button button-outline" href="#servicios">Ver servicios <ChevronRight size={20} /></a></div>
         </div>
-        <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/vial.png"} alt="" /><div className="photo-note">Un tránsito<br />más seguro<br />para la Región</div></div>
+        <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/vial.png"} alt="" /></div>
       </section>
 
       <section className="feature-strip" aria-label="Ventajas">
@@ -107,7 +107,7 @@ export default function Home() {
 
       <section className="section" id="proyectos">
         <div className="section-heading split-heading"><div><div className="eyebrow">Nuestros proyectos</div><h2>Trabajos realizados</h2></div><a href="#contacto" className="button button-white">Ver más proyectos <ChevronRight size={18} /></a></div>
-        <div className="project-grid">{projects.map((project, index) => <article className="project-card" key={project.title}><div className={`photo-crop project-photo ${project.crop}`}><img src="/images/vial2.png" alt="" /></div><div className="project-info"><span><TrafficCone size={20} /></span><div><h3>{project.title}</h3><p>{project.detail}</p></div><b>0{index + 1}</b></div></article>)}</div>
+        <div className="project-grid">{projects.map((project, index) => <article className="project-card" key={project.title}><div className={`photo-crop project-photo ${project.crop}`}><img src={`/images/${index === 0 ? "vial.png" : index === 1 ? "vial2.png" : "vial3.png"}`} alt="" /></div><div className="project-info"><span><TrafficCone size={20} /></span><div><h3>{project.title}</h3><p>{project.detail}</p></div><b>0{index + 1}</b></div></article>)}</div>
       </section>
 
       <section className="coverage" id="cobertura"><div className="coverage-copy"><div className="eyebrow light">Nuestra cobertura</div><h2>Cobertura en la <span>Región del Biobío</span></h2><p>Brindamos soluciones de seguridad vial en {site.coverage}, acompañando obras, faenas y desvíos.</p></div><div className="coverage-place"><MapPin /><strong>Concepción</strong><span>Región del Biobío</span></div></section>
