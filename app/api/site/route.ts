@@ -9,6 +9,13 @@ export async function GET() {
       sql`SELECT title,description,icon FROM services WHERE visible=true ORDER BY sort_order`,
       sql`SELECT title,description,image_url FROM projects WHERE visible=true ORDER BY sort_order`,
     ]);
-    return NextResponse.json({ settings: Object.fromEntries(settings.map((row: any) => [row.key, row.value])), services, projects });
+    const settingsMap = Object.fromEntries(settings.map((row: any) => [row.key, row.value]));
+    const fallbackProjects = [
+      { title:"Obras urbanas Concepción", description:"Conificación vial", location:"Concepción" },
+      { title:"Desvío ruta regional", description:"Señalización temporal", location:"San Pedro de la Paz" },
+      { title:"Apoyo en faena", description:"Control del tránsito", location:"Talcahuano" },
+    ];
+    const projectRows = (projects.length ? projects : fallbackProjects).map((project: any, index: number) => ({ ...project, image_url: project.image_url || settingsMap[`project_image_project-${index + 1}`] || null }));
+    return NextResponse.json({ settings: settingsMap, services, projects: projectRows });
   } catch { return NextResponse.json({ settings: {}, services: [], projects: [] }); }
 }

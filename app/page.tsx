@@ -30,13 +30,10 @@ export default function Home() {
   const [formState, setFormState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState(defaultProjects);
-  const [site, setSite] = useState(() => {
-    const defaults = { hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"contacto@automega.cl", coverage:"Concepción y toda la Región del Biobío", hero_image:"", logo_url:"" };
-    if (typeof window === "undefined") return defaults;
-    try { return { ...defaults, ...JSON.parse(localStorage.getItem("automega_site_settings") || "{}")} } catch { return defaults; }
-  });
+  const [site, setSite] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"contacto@automega.cl", coverage:"Concepción y toda la Región del Biobío", hero_image:"", logo_url:"" });
 
   useEffect(() => {
+    try { const cached = JSON.parse(localStorage.getItem("automega_site_settings") || "{}"); if (cached && typeof cached === "object") setSite(current => ({ ...current, ...cached })); } catch {}
     fetch("/api/site").then(response => response.json()).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
       if (settings) setSite(current => { const next = { ...current, ...settings }; try { localStorage.setItem("automega_site_settings", JSON.stringify(next)); } catch {} return next; });
       if (remoteServices?.length) setServices(remoteServices.map((item: { title:string; description:string }, index:number) => ({ icon:[TrafficCone,Construction,HardHat][index%3], title:item.title, text:item.description })));
