@@ -1,0 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE TABLE IF NOT EXISTS site_settings (key text PRIMARY KEY, value text NOT NULL, updated_at timestamptz DEFAULT now());
+CREATE TABLE IF NOT EXISTS services (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title text NOT NULL, description text NOT NULL, icon text DEFAULT 'cone', sort_order int DEFAULT 0, visible boolean DEFAULT true, created_at timestamptz DEFAULT now());
+CREATE TABLE IF NOT EXISTS projects (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title text NOT NULL, description text NOT NULL, location text, image_url text, sort_order int DEFAULT 0, visible boolean DEFAULT true, created_at timestamptz DEFAULT now());
+CREATE TABLE IF NOT EXISTS site_images (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), file_name text NOT NULL, public_url text NOT NULL, alt_text text, section text DEFAULT 'gallery', sort_order int DEFAULT 0, visible boolean DEFAULT true, created_at timestamptz DEFAULT now());
+CREATE TABLE IF NOT EXISTS quote_requests (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), name text NOT NULL, company text, phone text NOT NULL, email text NOT NULL, city text NOT NULL, service_name text NOT NULL, message text NOT NULL, status text DEFAULT 'new', created_at timestamptz DEFAULT now());
+INSERT INTO site_settings (key,value) VALUES ('site_name','AUTOMEGA'),('phone','+56 9 XXXX XXXX'),('whatsapp','+56 9 XXXX XXXX'),('email','contacto@automega.cl'),('coverage','Concepción y toda la Región del Biobío') ON CONFLICT (key) DO NOTHING;
