@@ -70,7 +70,7 @@ export default function AdminWorkspace({ section }: { section: string }) {
       const response = await fetch("/api/upload", { method:"POST", body:form });
       const result = await response.json() as { error?: string; publicUrl?: string }; if (!response.ok) throw new Error(result.error || "No fue posible cargar la imagen");
       const imageUrl = String(result.publicUrl); setItems(list=>[{id:`image-${Date.now()}`,title:file.name,description:"Imagen guardada en Neon",visible:true,sort_order:0,image_url:imageUrl},...list]);
-      if(target!=="gallery"){const key=target==="hero"?"hero_image":"logo_url";setSettings(current=>({...current,[key]:imageUrl}));}
+      if(target!=="gallery"){const key=target==="hero"?"hero_image":"logo_url";setSettings(current=>{const next={...current,[key]:imageUrl};try{localStorage.setItem("automega_site_settings",JSON.stringify(next));}catch{}return next;});}
       toast.success("Imagen guardada correctamente");
     } catch (error) { toast.error(error instanceof Error ? error.message : "No fue posible guardar la imagen"); }
     setLoading(false);
