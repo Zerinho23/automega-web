@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   const form = await request.formData();
   const file = form.get("file");
@@ -17,7 +19,8 @@ export async function POST(request: Request) {
     } else if (target.startsWith("project:")) {
       const projectId = target.slice("project:".length);
       if (!projectId || projectId.startsWith("draft-")) return NextResponse.json({ ok: true, publicUrl, mode: "demo" });
-      await sql`UPDATE projects SET image_url=${publicUrl} WHERE id=${projectId}`;
+      if (/^[0-9a-f-]{36}$/i.test(projectId)) await sql`UPDATE projects SET image_url=${publicUrl} WHERE id=${projectId}`;
+      else await sql`INSERT INTO site_settings (key,value) VALUES (${`project_image_${projectId}`},${publicUrl}) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value,updated_at=now()`;
     } else {
       await sql`INSERT INTO site_images (file_name,public_url,alt_text,section) VALUES (${file.name},${publicUrl},${file.name},${target})`;
     }

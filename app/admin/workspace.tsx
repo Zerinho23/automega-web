@@ -68,9 +68,12 @@ export default function AdminWorkspace({ section }: { section: string }) {
     try {
       const form = new FormData(); form.append("file", file); form.append("target", target);
       const response = await fetch("/api/upload", { method:"POST", body:form });
-      const result = await response.json() as { error?: string; publicUrl?: string }; if (!response.ok) throw new Error(result.error || "No fue posible cargar la imagen");
-      const imageUrl = String(result.publicUrl); setItems(list=>[{id:`image-${Date.now()}`,title:file.name,description:"Imagen guardada en Neon",visible:true,sort_order:0,image_url:imageUrl},...list]);
-      if(target!=="gallery"){const key=target==="hero"?"hero_image":"logo_url";setSettings(current=>{const next={...current,[key]:imageUrl};try{localStorage.setItem("automega_site_settings",JSON.stringify(next));}catch{}return next;});}
+      const raw = await response.text(); let result: { error?: string; publicUrl?: string } = {}; try { result = JSON.parse(raw); } catch { throw new Error("El servidor no pudo procesar la imagen. Reinicia el servidor e inténtalo nuevamente."); }
+      if (!response.ok) throw new Error(result.error || "No fue posible cargar la imagen");
+      const imageUrl = String(result.publicUrl || ""); if (!imageUrl) throw new Error("El servidor no devolvió la imagen");
+      if (target.startsWith("project:")) { const id=target.slice("project:".length); setItems(list=>list.map(item=>item.id===id?{...item,image_url:imageUrl}:item)); try{const map=JSON.parse(localStorage.getItem("automega_project_images")||"{}");map[id]=imageUrl;localStorage.setItem("automega_project_images",JSON.stringify(map));}catch{} }
+      else { setItems(list=>[{id:`image-${Date.now()}`,title:file.name,description:"Imagen guardada en Neon",visible:true,sort_order:0,image_url:imageUrl},...list]); }
+      if(target!=="gallery" && !target.startsWith("project:")){const key=target==="hero"?"hero_image":"logo_url";setSettings(current=>{const next={...current,[key]:imageUrl};try{localStorage.setItem("automega_site_settings",JSON.stringify(next));}catch{}return next;});}
       toast.success("Imagen guardada correctamente");
     } catch (error) { toast.error(error instanceof Error ? error.message : "No fue posible guardar la imagen"); }
     setLoading(false);
