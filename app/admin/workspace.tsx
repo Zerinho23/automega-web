@@ -29,7 +29,7 @@ const labels: Record<string, [string,string]> = {
 export default function AdminWorkspace({ section }: { section: string }) {
   const [items, setItems] = useState<Item[]>(section === "services" ? initialServices : section === "projects" ? initialProjects : []);
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"contacto@automega.cl", address:"Concepción, Región del Biobío", coverage:"Concepción y toda la Región del Biobío", site_name:"AUTOMEGA SpA", about_image:"" });
+  const [settings, setSettings] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"diego.mora@automegaspa.com", address:"Concepción, Región del Biobío", coverage:"Concepción y toda la Región del Biobío", site_name:"AUTOMEGA SpA", about_image:"" });
   const title = labels[section] || ["Administración","Gestiona el contenido del sitio."];
   const table = section === "services" ? "services" : section === "projects" ? "projects" : section === "quotes" ? "quote_requests" : "";
   const supabase = useMemo(() => createClient(), []);
