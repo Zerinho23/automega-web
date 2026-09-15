@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   if (!sql) return NextResponse.json({ items: [], settings: {} }, { headers: { "Cache-Control": "no-store" } });
   try {
     if (section === "quotes") {
-      const items = await sql`SELECT id,name,email,service_name,city,message,status,created_at FROM quote_requests ORDER BY created_at DESC`;
+      const items = await sql`SELECT id,name,company,phone,email,service_name,city,message,status,created_at FROM quote_requests ORDER BY created_at DESC`;
       return NextResponse.json({ items }, { headers: { "Cache-Control": "no-store" } });
     }
     if (section === "services") {
@@ -60,7 +60,7 @@ export async function PATCH(request: Request) {
       for (const item of body.items || []) {
         if (!item.title || !item.description) continue;
         if (String(item.id).startsWith("draft-")) await sql`INSERT INTO projects (title,description,location,image_url,visible,sort_order) VALUES (${String(item.title)},${String(item.description)},${item.location ? String(item.location) : null},${item.image_url ? String(item.image_url) : null},${Boolean(item.visible)},${Number(item.sort_order) || 0})`;
-        else await sql`UPDATE projects SET title=${String(item.title)},description=${String(item.description)},location=${item.location ? String(item.location) : null},visible=${Boolean(item.visible)},sort_order=${Number(item.sort_order) || 0} WHERE id=${item.id}`;
+        else await sql`UPDATE projects SET title=${String(item.title)},description=${String(item.description)},location=${item.location ? String(item.location) : null},image_url=${item.image_url ? String(item.image_url) : null},visible=${Boolean(item.visible)},sort_order=${Number(item.sort_order) || 0} WHERE id=${item.id}`;
       }
       return NextResponse.json({ ok: true });
     }
