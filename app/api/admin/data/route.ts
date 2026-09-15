@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
+import { isAdminSession } from "@/lib/admin-session";
 
 export const dynamic = "force-dynamic";
 
-function authorized(request: Request) {
-  return (request.headers.get("cookie") || "").includes("automega_demo_admin=active");
-}
-
 export async function GET(request: Request) {
-  if (!authorized(request)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await isAdminSession(request))) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const section = new URL(request.url).searchParams.get("section") || "";
   if (!sql) return NextResponse.json({ items: [], settings: {} }, { headers: { "Cache-Control": "no-store" } });
   try {
@@ -36,7 +33,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  if (!authorized(request) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await isAdminSession(request)) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   try {
     const body = await request.json() as { section?: string; id?: string; status?: string; items?: any[]; settings?: Record<string, string> };
     if (body.section === "quotes") {
@@ -74,7 +71,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!authorized(request) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await isAdminSession(request)) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const body = await request.json() as { section?: string; id?: string };
   if (!body.id || !["services", "projects", "images"].includes(body.section || "")) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
   try {

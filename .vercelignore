@@ -1,0 +1,8 @@
+.env*
+!.env.example
+.next
+.next-*
+next-build
+outputs
+node_modules
+*.zip

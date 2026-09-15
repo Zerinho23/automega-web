@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
+import { isAdminSession } from "@/lib/admin-session";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const cookie = request.headers.get("cookie") || "";
-  if (!cookie.includes("automega_demo_admin=active")) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await isAdminSession(request))) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!sql) return NextResponse.json({ counts:{newQuotes:0,projects:0,services:0,images:0}, recent:[], settings:{} });
   try {
     const [quotes, projects, services, images, projectImages, settingImages, recent, settings] = await Promise.all([

@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
+import { isAdminSession } from "@/lib/admin-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  if (!(request.headers.get("cookie") || "").includes("automega_demo_admin=active")) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await isAdminSession(request))) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const form = await request.formData();
   const file = form.get("file");
   const target = String(form.get("target") || "gallery");
   if (!(file instanceof File)) return NextResponse.json({ error: "No se recibió la imagen" }, { status: 400 });
   if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) return NextResponse.json({ error: "Formato no permitido. Usa PNG, JPG o WebP." }, { status: 400 });
-  if (file.size > 8 * 1024 * 1024) return NextResponse.json({ error: "La imagen supera los 8 MB" }, { status: 400 });
+  if (file.size > 4 * 1024 * 1024) return NextResponse.json({ error: "La imagen supera los 4 MB permitidos" }, { status: 400 });
   const buffer = Buffer.from(await file.arrayBuffer());
   const publicUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
   if (!sql) return NextResponse.json({ error: "La base de datos no está configurada" }, { status: 503 });

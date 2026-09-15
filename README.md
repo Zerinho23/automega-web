@@ -32,7 +32,7 @@ La migración crea perfiles, configuración, servicios, proyectos, imágenes y s
 
 ## Vercel
 
-El proyecto usa las convenciones estándar de Next.js. Cuando se autorice la publicación, crea un proyecto en Vercel, importa esta carpeta y agrega las mismas variables de `.env.local`. No se ha creado repositorio, no se ha subido nada a GitHub y no se ha realizado ningún despliegue.
+El proyecto usa las convenciones estándar de Next.js y está preparado para Vercel. Importa el repositorio desde Vercel y configura `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET` como variables de producción. La región de ejecución está configurada cerca de la base Neon para reducir latencia.
 
 ## Seguridad
 
