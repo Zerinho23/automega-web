@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./design-upgrade.css";
+import MotionEnhancements from "@/components/motion-enhancements";
 
 export const metadata: Metadata = {
   title: "AUTOMEGA SpA | Seguridad y control vial",
@@ -18,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">{children}<MotionEnhancements /></body>
     </html>
   );
 }
