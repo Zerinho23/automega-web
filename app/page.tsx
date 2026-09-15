@@ -17,9 +17,9 @@ const defaultProjects = [
 
 function Logo({ inverse = false, logoUrl = "" }: { inverse?: boolean; logoUrl?: string }) {
   return (
-    <a className={`brand ${inverse ? "brand-inverse" : ""}`} href="#inicio" aria-label="AUTOMEGA, inicio">
+    <a className={`brand ${inverse ? "brand-inverse" : ""}`} href="#inicio" aria-label="AUTOMEGA SpA, inicio">
       {logoUrl ? <img className="brand-logo-image" src={logoUrl} alt="" /> : <span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>}
-      <span><strong>AUTOMEGA</strong><small>SEGURIDAD Y CONTROL VIAL</small></span>
+      <span><strong>AUTOMEGA <em>SpA</em></strong><small>SEGURIDAD Y CONTROL VIAL</small></span>
     </a>
   );
 }
@@ -45,7 +45,7 @@ export default function Home() {
     if (!context?.registerTool) return;
     const lifecycle = new AbortController();
     void Promise.resolve(context.registerTool({
-      name:"submit_quote_request", title:"Solicitar cotización AUTOMEGA",
+      name:"submit_quote_request", title:"Solicitar cotización AUTOMEGA SpA",
       description:"Envía una solicitud de cotización vial y la registra en el mismo sistema usado por el formulario visible.",
       inputSchema:{type:"object",properties:{name:{type:"string"},company:{type:"string"},phone:{type:"string"},email:{type:"string",format:"email"},city:{type:"string"},service:{type:"string"},message:{type:"string"}},required:["name","phone","email","city","service","message"],additionalProperties:false},
       annotations:{readOnlyHint:false,untrustedContentHint:true},
@@ -84,7 +84,7 @@ export default function Home() {
           <p>{site.hero_text}</p>
           <div className="hero-actions"><a className="button button-yellow" href="#contacto">Solicitar cotización <ChevronRight size={20} /></a><a className="button button-outline" href="#servicios">Ver servicios <ChevronRight size={20} /></a></div>
         </div>
-        <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/vial.png"} alt="" /></div>
+        <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/vial.png"} alt="" /><div className="hero-photo-badge"><MapPin /><span><strong>Operación regional</strong><small>Concepción · Biobío</small></span></div></div>
       </section>
 
       <section className="feature-strip" aria-label="Ventajas">
@@ -97,7 +97,7 @@ export default function Home() {
       </section>
 
       <section className="section about-grid" id="nosotros">
-        <div className="about-copy"><div className="eyebrow">Sobre AUTOMEGA</div><h2>{site.about_title === "Seguridad vial para cada trabajo" ? <>Seguridad vial para <span>cada trabajo</span></> : site.about_title}</h2><p>En AUTOMEGA entregamos servicios de conificación, señalización temporal y control del tránsito para obras, faenas y desvíos en Concepción y distintas ciudades de la Región del Biobío.</p><p>Contamos con equipos certificados y una operación orientada a la seguridad, para que cada proyecto se desarrolle de forma eficiente y segura.</p><a className="button button-yellow" href="#contacto">Conocer más sobre nosotros <ChevronRight size={18} /></a></div>
+        <div className="about-copy"><div className="eyebrow">Sobre AUTOMEGA SpA</div><h2>{site.about_title === "Seguridad vial para cada trabajo" ? <>Seguridad vial para <span>cada trabajo</span></> : site.about_title}</h2><p>En AUTOMEGA SpA entregamos servicios de conificación, señalización temporal y control del tránsito para obras, faenas y desvíos en Concepción y distintas ciudades de la Región del Biobío.</p><p>Contamos con equipos certificados y una operación orientada a la seguridad, para que cada proyecto se desarrolle de forma eficiente y segura.</p><a className="button button-yellow" href="#contacto">Conocer más sobre nosotros <ChevronRight size={18} /></a></div>
         <div className="photo-crop about-photo" role="img" aria-label="Conificación de una vía urbana"><img src={site.about_image || "/images/vial2.png"} alt="" /></div>
       </section>
 
@@ -127,7 +127,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer><div className="footer-main"><Logo /><nav>{[["Inicio", "inicio"], ["Nosotros", "nosotros"], ["Servicios", "servicios"], ["Cobertura", "cobertura"], ["Proyectos", "proyectos"], ["Contacto", "contacto"]].map(([label, id]) => <a key={label} href={`#${id}`}>{label}</a>)}</nav><span className="location-pill"><MapPin size={14} /> Concepción · Región del Biobío</span></div><div className="footer-bottom"><span>© {new Date().getFullYear()} AUTOMEGA. Todos los derechos reservados.</span><span>Términos de uso &nbsp; | &nbsp; Privacidad</span></div></footer>
+      <footer><div className="footer-main"><Logo /><nav>{[["Inicio", "inicio"], ["Nosotros", "nosotros"], ["Servicios", "servicios"], ["Cobertura", "cobertura"], ["Proyectos", "proyectos"], ["Contacto", "contacto"]].map(([label, id]) => <a key={label} href={`#${id}`}>{label}</a>)}</nav><span className="location-pill"><MapPin size={14} /> Concepción · Región del Biobío</span></div><div className="footer-bottom"><span>© {new Date().getFullYear()} AUTOMEGA SpA. Todos los derechos reservados.</span><span>Términos de uso &nbsp; | &nbsp; Privacidad</span></div></footer>
       <a className="whatsapp" href="https://wa.me/56966473375" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp"><MessageCircle /></a>
     </main>
   );

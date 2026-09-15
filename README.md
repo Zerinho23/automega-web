@@ -1,6 +1,6 @@
-# AUTOMEGA
+# AUTOMEGA SpA
 
-Sitio web y panel administrativo de AUTOMEGA, desarrollado con Next.js (App Router), TypeScript y Neon PostgreSQL. El proyecto es responsive y guarda el contenido, las imágenes y las solicitudes directamente en Neon.
+Sitio web y panel administrativo de AUTOMEGA SpA, desarrollado con Next.js (App Router), TypeScript y Neon PostgreSQL. El proyecto es responsive y guarda el contenido, las imágenes y las solicitudes directamente en Neon.
 
 ## Ejecutar localmente
 

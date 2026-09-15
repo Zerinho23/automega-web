@@ -13,7 +13,7 @@ const links = [
 ] as const;
 
 function AdminLogo() {
-  return <Link href="/admin" className="admin-brand"><span className="admin-mark"><i /></span><span><strong>AUTOMEGA</strong><small>SEGURIDAD Y CONTROL VIAL</small></span></Link>;
+  return <Link href="/admin" className="admin-brand"><span className="admin-mark"><i /></span><span><strong>AUTOMEGA <em>SpA</em></strong><small>SEGURIDAD Y CONTROL VIAL</small></span></Link>;
 }
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -36,7 +36,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <button className="logout" onClick={signOut}><LogOut /> Cerrar sesión</button>
       </aside>
       <div className="admin-main">
-        <header className="admin-topbar"><button className="admin-menu" onClick={() => setOpen(true)}><Menu /></button><strong>Panel administrativo</strong><div><a href="/" target="_blank" className="admin-view-site"><ExternalLink /> Ver sitio web</a><Bell /><span /> <i>AM</i><b>Administrador</b></div></header>
+        <header className="admin-topbar"><button className="admin-menu" onClick={() => setOpen(true)}><Menu /></button><div className="admin-topbar-title"><strong>Panel administrativo</strong><small>AUTOMEGA SpA</small></div><div><small className="admin-environment"><b /> Producción</small><a href="/" target="_blank" className="admin-view-site"><ExternalLink /> Ver sitio web</a><Bell /><span /> <i>AM</i><b>Administrador</b></div></header>
         <div className="admin-content">{children}</div>
       </div>
     </div>
