@@ -2,6 +2,7 @@
 
 import { ArrowRight, CalendarDays, CheckCircle2, ChevronRight, ClipboardList, Construction, HardHat, Mail, MapPin, Menu, MessageCircle, Phone, TrafficCone, Users, X, Zap } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
+import ProjectViewer from "@/components/project-viewer";
 
 const defaultServices = [
   { icon: TrafficCone, title: "Conificación vial", text: "Instalación y retiro de conos, delineadores y elementos de canalización para obras y desvíos." },
@@ -10,9 +11,9 @@ const defaultServices = [
 ];
 
 const defaultProjects = [
-  { title: "Conificación vial", detail: "Obras urbanas", crop: "gallery-one", image_url: "" },
-  { title: "Señalización temporal", detail: "Desvíos y cortes de tránsito", crop: "gallery-two", image_url: "" },
-  { title: "Control del tránsito", detail: "Apoyo en faenas", crop: "gallery-three", image_url: "" },
+  { title: "Conificación vial", detail: "Obras urbanas", crop: "gallery-one", image_url: "", location: "" },
+  { title: "Señalización temporal", detail: "Desvíos y cortes de tránsito", crop: "gallery-two", image_url: "", location: "" },
+  { title: "Control del tránsito", detail: "Apoyo en faenas", crop: "gallery-three", image_url: "", location: "" },
 ];
 
 function Logo({ inverse = false, logoUrl = "" }: { inverse?: boolean; logoUrl?: string }) {
@@ -26,6 +27,8 @@ function Logo({ inverse = false, logoUrl = "" }: { inverse?: boolean; logoUrl?: 
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("inicio");
+  const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [formState, setFormState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState(defaultProjects);
@@ -36,7 +39,7 @@ export default function Home() {
     fetch("/api/site", { cache: "no-store" }).then(response => response.json()).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
       if (settings) setSite(current => { const next = { ...current, ...settings }; try { localStorage.setItem("automega_site_settings", JSON.stringify(next)); } catch {} return next; });
       if (remoteServices?.length) setServices(remoteServices.map((item: { title:string; description:string }, index:number) => ({ icon:[TrafficCone,Construction,HardHat][index%3], title:item.title, text:item.description })));
-      if (remoteProjects?.length) { let localImages: Record<string,string> = {}; try { localImages = JSON.parse(localStorage.getItem("automega_project_images") || "{}"); } catch {} setProjects(remoteProjects.map((item: { title:string; description:string; image_url?:string }, index:number) => ({ title:item.title, detail:item.description, crop:["gallery-one","gallery-two","gallery-three"][index%3], image_url:item.image_url || localImages[`project-${index+1}`] || "" }))); }
+      if (remoteProjects?.length) { let localImages: Record<string,string> = {}; try { localImages = JSON.parse(localStorage.getItem("automega_project_images") || "{}"); } catch {} setProjects(remoteProjects.map((item: { title:string; description:string; image_url?:string; location?:string }, index:number) => ({ title:item.title, detail:item.description, location:item.location || "", crop:["gallery-one","gallery-two","gallery-three"][index%3], image_url:item.image_url || localImages[`project-${index+1}`] || "" }))); }
     }).catch(() => undefined);
   }, []);
 
@@ -54,15 +57,27 @@ export default function Home() {
     return () => lifecycle.abort();
   }, []);
 
+  useEffect(() => {
+    function trackSection() {
+      const sections = ["nosotros","servicios","cobertura","proyectos","contacto"];
+      const visible = sections.map(id => ({id,top:document.getElementById(id)?.getBoundingClientRect().top ?? Infinity})).filter(item=>item.top <= 160).sort((a,b)=>b.top-a.top);
+      setActiveSection(visible[0]?.id || "inicio");
+    }
+    window.addEventListener("scroll", trackSection, {passive:true});
+    trackSection();
+    return ()=>window.removeEventListener("scroll",trackSection);
+  }, []);
+
   async function submitQuote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormState("loading");
+    const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(event.currentTarget));
     try {
       const response = await fetch("/api/quotes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       if (!response.ok) throw new Error("No fue posible enviar");
       setFormState("success");
-      event.currentTarget.reset();
+      form.reset();
     } catch { setFormState("error"); }
   }
 
@@ -72,7 +87,7 @@ export default function Home() {
         <Logo logoUrl={site.logo_url} />
         <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menú">{menuOpen ? <X /> : <Menu />}</button>
         <nav className={menuOpen ? "nav-open" : ""} aria-label="Navegación principal">
-          {[["Inicio", "#inicio"], ["Nosotros", "#nosotros"], ["Servicios", "#servicios"], ["Cobertura", "#cobertura"], ["Proyectos", "#proyectos"], ["Contacto", "#contacto"]].map(([label, href]) => <a key={label} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}
+          {[["Inicio", "#inicio"], ["Nosotros", "#nosotros"], ["Servicios", "#servicios"], ["Cobertura", "#cobertura"], ["Proyectos", "#proyectos"], ["Contacto", "#contacto"]].map(([label, href]) => <a key={label} href={href} className={activeSection === href.slice(1) ? "active-section" : ""} aria-current={activeSection === href.slice(1) ? "location" : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}
         </nav>
         <a className="button button-yellow header-cta" href="#contacto">Solicitar cotización <ChevronRight size={18} /></a>
       </header>
@@ -84,7 +99,7 @@ export default function Home() {
           <p>{site.hero_text}</p>
           <div className="hero-actions"><a className="button button-yellow" href="#contacto">Solicitar cotización <ChevronRight size={20} /></a><a className="button button-outline" href="#servicios">Ver servicios <ChevronRight size={20} /></a></div>
         </div>
-        <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/vial.png"} alt="" /><div className="hero-photo-badge"><MapPin /><span><strong>Operación regional</strong><small>Concepción · Biobío</small></span></div></div>
+        <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/vial.png"} alt="" fetchPriority="high" decoding="async" /><div className="hero-photo-badge"><MapPin /><span><strong>Operación regional</strong><small>Concepción · Biobío</small></span></div></div>
       </section>
 
       <section className="feature-strip" aria-label="Ventajas">
@@ -98,7 +113,7 @@ export default function Home() {
 
       <section className="section about-grid" id="nosotros">
         <div className="about-copy"><div className="eyebrow">Sobre AUTOMEGA SpA</div><h2>{site.about_title === "Seguridad vial para cada trabajo" ? <>Seguridad vial para <span>cada trabajo</span></> : site.about_title}</h2><p>En AUTOMEGA SpA entregamos servicios de conificación, señalización temporal y control del tránsito para obras, faenas y desvíos en Concepción y distintas ciudades de la Región del Biobío.</p><p>Contamos con equipos certificados y una operación orientada a la seguridad, para que cada proyecto se desarrolle de forma eficiente y segura.</p><a className="button button-yellow" href="#contacto">Conocer más sobre nosotros <ChevronRight size={18} /></a></div>
-        <div className="photo-crop about-photo" role="img" aria-label="Conificación de una vía urbana"><img src={site.about_image || "/images/vial2.png"} alt="" /></div>
+        <div className="photo-crop about-photo" role="img" aria-label="Conificación de una vía urbana"><img src={site.about_image || "/images/vial2.png"} alt="" loading="lazy" decoding="async" /></div>
       </section>
 
       <section className="section process-section">
@@ -107,8 +122,8 @@ export default function Home() {
       </section>
 
       <section className="section" id="proyectos">
-        <div className="section-heading split-heading"><div><div className="eyebrow">Nuestros proyectos</div><h2>Trabajos realizados</h2></div><a href="#contacto" className="button button-white">Ver más proyectos <ChevronRight size={18} /></a></div>
-        <div className="project-grid">{projects.map((project, index) => <article className="project-card" key={project.title}><div className={`photo-crop project-photo ${project.crop}`}><img src={project.image_url || `/images/${index === 0 ? "vial.png" : index === 1 ? "vial2.png" : "vial3.png"}`} alt="" /></div><div className="project-info"><span><TrafficCone size={20} /></span><div><h3>{project.title}</h3><p>{project.detail}</p></div><b>0{index + 1}</b></div></article>)}</div>
+        <div className="section-heading split-heading"><div><div className="eyebrow">Nuestros proyectos</div><h2>Trabajos realizados</h2></div><span className="gallery-instruction">Selecciona un trabajo para ver sus detalles</span></div>
+        <div className="project-grid">{projects.map((project, index) => <article className="project-card" key={project.title}><button type="button" className={`photo-crop project-photo gallery-open ${project.crop}`} aria-label={`Ver detalles de ${project.title}`} onClick={() => setSelectedProject(index)}><img src={project.image_url || `/images/${index === 0 ? "vial.png" : index === 1 ? "vial2.png" : "vial3.png"}`} alt={project.title} loading="lazy" decoding="async" /><span className="gallery-open-label">Ampliar fotografía ↗</span></button><div className="project-info"><span><TrafficCone size={20} /></span><div><h3>{project.title}</h3><p>{project.detail}</p></div><b>0{index + 1}</b></div></article>)}</div>
       </section>
 
       <section className="coverage" id="cobertura"><div className="coverage-copy"><div className="eyebrow light">Nuestra cobertura</div><h2>Cobertura en la <span>Región del Biobío</span></h2><p>Brindamos soluciones de seguridad vial en {site.coverage}, acompañando obras, faenas y desvíos.</p></div><div className="coverage-place"><MapPin /><strong>Concepción</strong><span>Región del Biobío</span></div></section>
@@ -123,12 +138,13 @@ export default function Home() {
             {formState === "success" && <p className="form-message success"><CheckCircle2 /> Tu solicitud fue enviada correctamente. Te contactaremos pronto.</p>}
             {formState === "error" && <p className="form-message error">No pudimos enviar la solicitud. Revisa los datos e inténtalo nuevamente.</p>}
           </form>
-          <aside className="contact-card"><h3>También puedes contactarnos directamente</h3><div className="contact-line"><span><Phone /></span><div><strong>{site.phone}</strong><small>Atención de lunes a viernes</small></div></div><div className="contact-line"><span><Mail /></span><div><strong>{site.email}</strong><small>Te responderemos a la brevedad</small></div></div><hr /><div className="contact-line"><span className="gray"><MapPin /></span><div><strong>{site.coverage}</strong><small>Operamos en toda la Región</small></div></div></aside>
+          <aside className="contact-card"><h3>También puedes contactarnos directamente</h3><div className="contact-line"><span><Phone /></span><div><a href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}><strong>{site.phone}</strong></a><small>Atención de lunes a viernes</small></div></div><div className="contact-line"><span><Mail /></span><div><a href={`mailto:${site.email}`}><strong>{site.email}</strong></a><small>Te responderemos a la brevedad</small></div></div><hr /><div className="contact-line"><span className="gray"><MapPin /></span><div><strong>{site.coverage}</strong><small>Operamos en toda la Región</small></div></div></aside>
         </div>
       </section>
 
       <footer><div className="footer-main"><Logo /><nav>{[["Inicio", "inicio"], ["Nosotros", "nosotros"], ["Servicios", "servicios"], ["Cobertura", "cobertura"], ["Proyectos", "proyectos"], ["Contacto", "contacto"]].map(([label, id]) => <a key={label} href={`#${id}`}>{label}</a>)}</nav><span className="location-pill"><MapPin size={14} /> Concepción · Región del Biobío</span></div><div className="footer-bottom"><span>© {new Date().getFullYear()} AUTOMEGA SpA. Todos los derechos reservados.</span><span>Términos de uso &nbsp; | &nbsp; Privacidad</span></div></footer>
-      <a className="whatsapp" href="https://wa.me/56966473375" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp"><MessageCircle /></a>
+      <a className="whatsapp" href={`https://wa.me/${site.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent("Hola AUTOMEGA SpA, necesito cotizar un servicio de seguridad vial.")}`} target="_blank" rel="noopener noreferrer" aria-label="Solicitar cotización por WhatsApp"><img src="/whatsapp.svg" width="30" height="30" alt="" /><span>¿Cotizamos tu proyecto?</span></a>
+      {selectedProject !== null && <ProjectViewer project={projects[selectedProject]} image={projects[selectedProject].image_url || `/images/${selectedProject === 0 ? "vial.png" : selectedProject === 1 ? "vial2.png" : "vial3.png"}`} onClose={() => setSelectedProject(null)} />}
     </main>
   );
 }

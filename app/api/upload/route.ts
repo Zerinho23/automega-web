@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
 import { isAdminSession } from "@/lib/admin-session";
+import sharp from 'sharp';
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,8 +14,11 @@ export async function POST(request: Request) {
   if (!(file instanceof File)) return NextResponse.json({ error: "No se recibió la imagen" }, { status: 400 });
   if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) return NextResponse.json({ error: "Formato no permitido. Usa PNG, JPG o WebP." }, { status: 400 });
   if (file.size > 4 * 1024 * 1024) return NextResponse.json({ error: "La imagen supera los 4 MB permitidos" }, { status: 400 });
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const publicUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
+  let buffer: Buffer;
+  try {
+    buffer = await sharp(Buffer.from(await file.arrayBuffer()), {limitInputPixels:40_000_000}).rotate().resize({width:target==='logo'?640:1920,withoutEnlargement:true}).webp({quality:82,lossless:target==='logo'}).toBuffer();
+  } catch { return NextResponse.json({error:'La imagen no es válida o tiene dimensiones demasiado grandes'},{status:400}); }
+  const publicUrl = `data:image/webp;base64,${buffer.toString("base64")}`;
   if (!sql) return NextResponse.json({ error: "La base de datos no está configurada" }, { status: 503 });
   try {
     if (["hero", "logo", "about"].includes(target)) {
