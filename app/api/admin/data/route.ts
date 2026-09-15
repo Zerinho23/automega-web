@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   if (!sql) return NextResponse.json({ items: [], settings: {} }, { headers: { "Cache-Control": "no-store" } });
   try {
     if (section === "quotes") {
-      const items = await sql`SELECT id,name,company,phone,email,service_name,city,message,status,created_at FROM quote_requests ORDER BY created_at DESC`;
+      const items = await sql`SELECT id,name,company,phone,email,service_name,city,message,status,created_at,internal_notes,assigned_to,follow_up_at FROM quote_requests ORDER BY created_at DESC`;
       return NextResponse.json({ items }, { headers: { "Cache-Control": "no-store" } });
     }
     if (section === "services") {
@@ -35,7 +35,12 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   if (!(await isAdminSession(request)) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   try {
-    const body = await request.json() as { section?: string; id?: string; status?: string; items?: any[]; settings?: Record<string, string> };
+    const body = await request.json() as { section?: string; id?: string; status?: string; items?: any[]; settings?: Record<string, string>;notes?:string;owner?:string;date?:string };
+    if (body.section === 'quote_followup') {
+      if (!body.id || typeof body.notes !== 'string' || body.notes.length > 4000 || typeof body.owner !== 'string' || body.owner.length > 120 || (body.date && !/^\d{4}-\d{2}-\d{2}$/.test(body.date))) return NextResponse.json({error:'Datos inválidos'},{status:400});
+      await sql`UPDATE quote_requests SET internal_notes=${body.notes},assigned_to=${body.owner},follow_up_at=${body.date || null} WHERE id=${body.id}`;
+      return NextResponse.json({ok:true});
+    }
     if (body.section === "quotes") {
       if (!body.id || !["new", "reviewed", "contacted", "closed"].includes(body.status || "")) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
       await sql`UPDATE quote_requests SET status=${body.status} WHERE id=${body.id}`;

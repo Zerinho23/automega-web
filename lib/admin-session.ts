@@ -18,12 +18,14 @@ export async function createAdminSession() {
 }
 
 export async function isAdminSession(request: Request) {
+  const origin = request.headers.get('origin');
+  if (origin && origin !== new URL(request.url).origin) return false;
   const secret = sessionSecret();
   if (!secret) return false;
   const cookie = request.headers.get("cookie") || "";
   const token = cookie.match(/(?:^|;\s*)automega_admin_session=([^;]+)/)?.[1];
   if (!token) return false;
   const [expires, suppliedSignature] = token.split(".");
-  if (!expires || !suppliedSignature || Number(expires) < Date.now()) return false;
+  if (!/^\d+$/.test(expires || '') || !/^[a-f0-9]{64}$/.test(suppliedSignature || '') || Number(expires) < Date.now()) return false;
   return suppliedSignature === await signature(expires, secret);
 }

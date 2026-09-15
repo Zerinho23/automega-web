@@ -1,5 +1,13 @@
 # AUTOMEGA SpA
 
+## Seguimiento y notificaciones
+
+Ejecuta `db/migrations/002_commercial_security.sql` en Neon antes de publicar esta versión. Las cotizaciones permiten guardar responsable, notas privadas y próximo contacto. La fecha es un recordatorio visible en el panel; no envía avisos programados.
+
+Para activar los avisos crea una clave de envío en Resend, verifica tu dominio y configura `RESEND_API_KEY`, `EMAIL_FROM` y `NOTIFICATION_EMAIL` en Vercel. Vuelve a desplegar. La bandeja muestra avisos pendientes, errores y mensajes aceptados por el proveedor; puedes procesar pendientes manualmente. Sin proveedor la cotización se guarda y el correo queda pendiente. Documentación: https://resend.com/docs/api-reference/emails/send-email
+
+El acceso tiene límite de 10 intentos por 15 minutos y el formulario 5 envíos por 15 minutos. Las contraseñas cambiadas se almacenan con PBKDF2; un fallo de consulta no permite entrar usando una contraseña antigua. Cambia la clave inicial desde Configuración. La autenticación de dos factores no está implementada todavía.
+
 Sitio web y panel administrativo de AUTOMEGA SpA, desarrollado con Next.js (App Router), TypeScript y Neon PostgreSQL. El proyecto es responsive y guarda el contenido, las imágenes y las solicitudes directamente en Neon.
 
 ## Ejecutar localmente
