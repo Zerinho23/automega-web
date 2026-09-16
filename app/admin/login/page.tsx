@@ -16,7 +16,7 @@ export default function LoginPage() {
       if (hasSupabaseConfig) {
         const supabase = createClient(); const { error } = await supabase!.auth.signInWithPassword({ email, password }); if (error) throw error;
       } else {
-        const response = await fetch("/api/auth/demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) }); if (!response.ok) throw new Error("Credenciales incorrectas");
+        const response = await fetch("/api/auth/demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) }); if (!response.ok) { const payload = await response.json().catch(() => ({})) as {error?:string}; throw new Error(payload.error || 'No fue posible iniciar sesión. Inténtalo nuevamente.'); }
       }
       router.replace("/admin"); router.refresh();
     } catch (cause) { setError(cause instanceof Error ? cause.message : "No fue posible iniciar sesión"); setLoading(false); }

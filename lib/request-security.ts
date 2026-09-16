@@ -2,8 +2,18 @@ import { createHash } from 'node:crypto';
 import { sql } from '@/lib/neon';
 
 export function sameOrigin(request: Request) {
+  if (request.headers.get('sec-fetch-site') === 'cross-site') return false;
   const origin = request.headers.get('origin');
   return !origin || origin === new URL(request.url).origin;
+}
+
+export async function readObject(request: Request, maximum = 32_000): Promise<Record<string, unknown>> {
+  if (Number(request.headers.get('content-length') || 0) > maximum) throw new Error('Datos demasiado grandes');
+  const raw = await request.text();
+  if (Buffer.byteLength(raw, 'utf8') > maximum) throw new Error('Datos demasiado grandes');
+  const value: unknown = JSON.parse(raw);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Datos inválidos');
+  return value as Record<string, unknown>;
 }
 
 export async function allowRequest(request: Request, scope: string, maximum: number, minutes: number) {

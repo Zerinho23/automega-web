@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
 import { isAdminSession } from "@/lib/admin-session";
+import { readObject } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   if (!(await isAdminSession(request))) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const section = new URL(request.url).searchParams.get("section") || "";
-  if (!sql) return NextResponse.json({ items: [], settings: {} }, { headers: { "Cache-Control": "no-store" } });
+  if (!sql) return NextResponse.json({error:'La información no está disponible. Inténtalo nuevamente.'},{status:503});
   try {
     if (section === "quotes") {
       const items = await sql`SELECT id,name,company,phone,email,service_name,city,message,status,created_at,internal_notes,assigned_to,follow_up_at FROM quote_requests ORDER BY created_at DESC`;
@@ -34,8 +35,10 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   if (!(await isAdminSession(request)) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  let body: { section?: string; id?: string; status?: string; items?: any[]; settings?: Record<string, string>;notes?:string;owner?:string;date?:string };
+  try { body = await readObject(request, 16_000_000) as typeof body; } catch { return NextResponse.json({error:'Datos inválidos'},{status:400}); }
+  if (['services','projects'].includes(body.section || '') && (!Array.isArray(body.items) || body.items.length > 100 || body.items.some(item => !item || typeof item.id !== 'string' || typeof item.title !== 'string' || !item.title.trim() || item.title.length > 200 || typeof item.description !== 'string' || !item.description.trim() || item.description.length > 4000 || typeof item.visible !== 'boolean' || !Number.isFinite(Number(item.sort_order))))) return NextResponse.json({error:'Completa el título y la descripción de cada elemento antes de guardar.'},{status:400});
   try {
-    const body = await request.json() as { section?: string; id?: string; status?: string; items?: any[]; settings?: Record<string, string>;notes?:string;owner?:string;date?:string };
     if (body.section === 'quote_followup') {
       if (!body.id || typeof body.notes !== 'string' || body.notes.length > 4000 || typeof body.owner !== 'string' || body.owner.length > 120 || (body.date && !/^\d{4}-\d{2}-\d{2}$/.test(body.date))) return NextResponse.json({error:'Datos inválidos'},{status:400});
       await sql`UPDATE quote_requests SET internal_notes=${body.notes},assigned_to=${body.owner},follow_up_at=${body.date || null} WHERE id=${body.id}`;
@@ -77,7 +80,8 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   if (!(await isAdminSession(request)) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const body = await request.json() as { section?: string; id?: string };
+  let body: { section?: string; id?: string };
+  try { body = await readObject(request, 2000) as typeof body; } catch { return NextResponse.json({error:'Datos inválidos'},{status:400}); }
   if (!body.id || !["services", "projects", "images"].includes(body.section || "")) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
   try {
     if (body.section === "services") await sql`DELETE FROM services WHERE id=${body.id}`;

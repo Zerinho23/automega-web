@@ -8,9 +8,12 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   if (!(await isAdminSession(request))) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const form = await request.formData();
+  if (Number(request.headers.get('content-length') || 0) > 4 * 1024 * 1024 + 64_000) return NextResponse.json({error:'La imagen supera los 4 MB permitidos'},{status:413});
+  let form: FormData;
+  try { form = await request.formData(); } catch { return NextResponse.json({error:'No se pudo leer la imagen. Selecciona el archivo nuevamente.'},{status:400}); }
   const file = form.get("file");
   const target = String(form.get("target") || "gallery");
+  if (!/^(hero|logo|about|gallery|project:[\w-]{1,80})$/.test(target)) return NextResponse.json({error:'Destino de imagen inválido'},{status:400});
   if (!(file instanceof File)) return NextResponse.json({ error: "No se recibió la imagen" }, { status: 400 });
   if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) return NextResponse.json({ error: "Formato no permitido. Usa PNG, JPG o WebP." }, { status: 400 });
   if (file.size > 4 * 1024 * 1024) return NextResponse.json({ error: "La imagen supera los 4 MB permitidos" }, { status: 400 });

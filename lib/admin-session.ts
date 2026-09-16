@@ -18,6 +18,7 @@ export async function createAdminSession() {
 }
 
 export async function isAdminSession(request: Request) {
+  if (request.headers.get('sec-fetch-site') === 'cross-site') return false;
   const origin = request.headers.get('origin');
   if (origin && origin !== new URL(request.url).origin) return false;
   const secret = sessionSecret();
@@ -25,7 +26,12 @@ export async function isAdminSession(request: Request) {
   const cookie = request.headers.get("cookie") || "";
   const token = cookie.match(/(?:^|;\s*)automega_admin_session=([^;]+)/)?.[1];
   if (!token) return false;
+  if (!/^\d{13}\.[a-f0-9]{64}$/.test(token)) return false;
   const [expires, suppliedSignature] = token.split(".");
   if (!/^\d+$/.test(expires || '') || !/^[a-f0-9]{64}$/.test(suppliedSignature || '') || Number(expires) < Date.now()) return false;
-  return suppliedSignature === await signature(expires, secret);
+  if (Number(expires) > Date.now() + 8 * 60 * 60 * 1000) return false;
+  const expected = await signature(expires, secret);
+  let difference = 0;
+  for (let index = 0; index < expected.length; index++) difference |= suppliedSignature.charCodeAt(index) ^ expected.charCodeAt(index);
+  return difference === 0;
 }

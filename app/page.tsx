@@ -29,6 +29,8 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("inicio");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [selectedService, setSelectedService] = useState('');
+  const [formError, setFormError] = useState('');
   const [formState, setFormState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState(defaultProjects);
@@ -36,10 +38,10 @@ export default function Home() {
 
   useEffect(() => {
     try { const cached = JSON.parse(localStorage.getItem("automega_site_settings") || "{}"); if (cached && typeof cached === "object") setSite(current => ({ ...current, ...cached })); } catch {}
-    fetch("/api/site", { cache: "no-store" }).then(response => response.json()).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
+    fetch("/api/site", { cache: "no-store" }).then(response => { if (!response.ok) throw new Error('Contenido no disponible'); return response.json(); }).then((payload: any) => { const { settings, services: remoteServices, projects: remoteProjects } = payload;
       if (settings) setSite(current => { const next = { ...current, ...settings }; try { localStorage.setItem("automega_site_settings", JSON.stringify(next)); } catch {} return next; });
-      if (remoteServices?.length) setServices(remoteServices.map((item: { title:string; description:string }, index:number) => ({ icon:[TrafficCone,Construction,HardHat][index%3], title:item.title, text:item.description })));
-      if (remoteProjects?.length) { let localImages: Record<string,string> = {}; try { localImages = JSON.parse(localStorage.getItem("automega_project_images") || "{}"); } catch {} setProjects(remoteProjects.map((item: { title:string; description:string; image_url?:string; location?:string }, index:number) => ({ title:item.title, detail:item.description, location:item.location || "", crop:["gallery-one","gallery-two","gallery-three"][index%3], image_url:item.image_url || localImages[`project-${index+1}`] || "" }))); }
+      if (Array.isArray(remoteServices)) setServices(remoteServices.map((item: { title:string; description:string }, index:number) => ({ icon:[TrafficCone,Construction,HardHat][index%3], title:item.title, text:item.description })));
+      if (Array.isArray(remoteProjects)) setProjects(remoteProjects.map((item: { title:string; description:string; image_url?:string; location?:string }, index:number) => ({ title:item.title, detail:item.description, location:item.location || "", crop:["gallery-one","gallery-two","gallery-three"][index%3], image_url:item.image_url || "" })));
     }).catch(() => undefined);
   }, []);
 
@@ -71,22 +73,24 @@ export default function Home() {
   async function submitQuote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormState("loading");
+    setFormError('');
     const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(event.currentTarget));
     try {
       const response = await fetch("/api/quotes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      if (!response.ok) throw new Error("No fue posible enviar");
+      if (!response.ok) { const result = await response.json().catch(() => ({})) as {error?:string}; throw new Error(result.error || 'No pudimos enviar la solicitud. Inténtalo nuevamente.'); }
       setFormState("success");
       form.reset();
-    } catch { setFormState("error"); }
+      setSelectedService('');
+    } catch (error) { setFormError(error instanceof Error ? error.message : 'No pudimos enviar la solicitud.'); setFormState("error"); }
   }
 
   return (
     <main>
       <header className="site-header" id="inicio">
         <Logo logoUrl={site.logo_url} />
-        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menú">{menuOpen ? <X /> : <Menu />}</button>
-        <nav className={menuOpen ? "nav-open" : ""} aria-label="Navegación principal">
+        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={menuOpen} aria-controls="main-navigation">{menuOpen ? <X /> : <Menu />}</button>
+        <nav id="main-navigation" className={menuOpen ? "nav-open" : ""} aria-label="Navegación principal">
           {[["Inicio", "#inicio"], ["Nosotros", "#nosotros"], ["Servicios", "#servicios"], ["Cobertura", "#cobertura"], ["Proyectos", "#proyectos"], ["Contacto", "#contacto"]].map(([label, href]) => <a key={label} href={href} className={activeSection === href.slice(1) ? "active-section" : ""} aria-current={activeSection === href.slice(1) ? "location" : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}
         </nav>
         <a className="button button-yellow header-cta" href="#contacto">Solicitar cotización <ChevronRight size={18} /></a>
@@ -108,7 +112,7 @@ export default function Home() {
 
       <section className="section" id="servicios">
         <div className="section-heading split-heading"><div><div className="eyebrow">Nuestros servicios</div><h2>Soluciones para trabajos viales seguros</h2></div><div className="location-pill"><MapPin size={16} /> Concepción · Región del Biobío</div></div>
-        <div className="service-grid">{services.map(({ icon: Icon, title, text }) => <article className="service-card" key={title}><span className="icon-tile"><Icon /></span><div><h3>{title}</h3><p>{text}</p></div><ArrowRight className="card-arrow" /></article>)}</div>
+        <div className="service-grid">{services.map(({ icon: Icon, title, text }) => <a className="service-card" href="#contacto" onClick={() => setSelectedService(title)} key={title} aria-label={`Cotizar ${title}`}><span className="icon-tile"><Icon /></span><div><h3>{title}</h3><p>{text}</p></div><ArrowRight className="card-arrow" /></a>)}</div>
       </section>
 
       <section className="section about-grid" id="nosotros">
@@ -132,11 +136,12 @@ export default function Home() {
         <div className="section-heading"><div className="eyebrow">Contáctanos</div><h2>Solicita una cotización</h2><p>Cuéntanos sobre tu proyecto y te contactaremos a la brevedad.</p></div>
         <div className="contact-grid">
           <form className="quote-form" onSubmit={submitQuote}>
-            <div className="field-grid"><label>Nombre *<input name="name" required /></label><label>Empresa<input name="company" /></label><label>Teléfono *<input name="phone" required /></label><label>Correo *<input name="email" type="email" required /></label><label>Ciudad o comuna *<input name="city" required /></label><label>Servicio requerido *<select name="service" required defaultValue=""><option value="" disabled>Seleccionar</option>{services.map(s => <option key={s.title}>{s.title}</option>)}</select></label></div>
-            <label>Mensaje *<textarea name="message" required rows={5} /></label>
+            <p className="form-help">Los campos con * son obligatorios.</p>
+            <div className="field-grid"><label>Nombre *<input name="name" required maxLength={200} autoComplete="name" placeholder="Tu nombre" /></label><label>Empresa<input name="company" maxLength={200} autoComplete="organization" placeholder="Opcional" /></label><label>Teléfono *<input name="phone" type="tel" required maxLength={22} pattern="[+0-9\s\(\)\-]{8,22}" autoComplete="tel" placeholder="+56 9 1234 5678" /></label><label>Correo *<input name="email" type="email" required maxLength={254} autoComplete="email" placeholder="nombre@empresa.cl" /></label><label>Ciudad o comuna *<input name="city" required maxLength={200} placeholder="Ubicación de la obra" /></label><label>Servicio requerido *<select name="service" required value={selectedService} onChange={event => setSelectedService(event.target.value)}><option value="" disabled>Seleccionar servicio</option>{services.map(s => <option key={s.title}>{s.title}</option>)}</select></label></div>
+            <label>Mensaje *<textarea name="message" required rows={5} maxLength={4000} placeholder="Describe el trabajo, la ubicación y la fecha estimada." /></label>
             <button className="button button-yellow submit-button" disabled={formState === "loading"}>{formState === "loading" ? "Enviando solicitud…" : "Enviar solicitud"} <ChevronRight size={18} /></button>
             {formState === "success" && <p className="form-message success"><CheckCircle2 /> Tu solicitud fue enviada correctamente. Te contactaremos pronto.</p>}
-            {formState === "error" && <p className="form-message error">No pudimos enviar la solicitud. Revisa los datos e inténtalo nuevamente.</p>}
+            {formState === "error" && <p className="form-message error" role="alert">{formError}</p>}
           </form>
           <aside className="contact-card"><h3>También puedes contactarnos directamente</h3><div className="contact-line"><span><Phone /></span><div><a href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}><strong>{site.phone}</strong></a><small>Atención de lunes a viernes</small></div></div><div className="contact-line"><span><Mail /></span><div><a href={`mailto:${site.email}`}><strong>{site.email}</strong></a><small>Te responderemos a la brevedad</small></div></div><hr /><div className="contact-line"><span className="gray"><MapPin /></span><div><strong>{site.coverage}</strong><small>Operamos en toda la Región</small></div></div></aside>
         </div>

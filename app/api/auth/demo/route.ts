@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { createAdminSession } from "@/lib/admin-session";
 import { sql } from "@/lib/neon";
 import { verifyPassword } from "@/lib/password";
-import { allowRequest, sameOrigin } from '@/lib/request-security';
+import { allowRequest, sameOrigin, readObject } from '@/lib/request-security';
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return NextResponse.json({error:'Origen no permitido'},{status:403});
   let body: {email?:string;password?:string};
-  try { body=await request.json() as typeof body; } catch { return NextResponse.json({error:'Datos inválidos'},{status:400}); }
+  try { body=await readObject(request, 2000) as typeof body; } catch { return NextResponse.json({error:'Datos inválidos'},{status:400}); }
   const { email, password } = body;
   if (typeof email !== 'string' || typeof password !== 'string' || password.length > 128) return NextResponse.json({error:'Datos inválidos'},{status:400});
   try { if (!(await allowRequest(request,'login',10,15))) return NextResponse.json({error:'Demasiados intentos. Espera 15 minutos.'},{status:429}); } catch { return NextResponse.json({error:'Acceso temporalmente no disponible'},{status:503}); }
@@ -27,7 +27,8 @@ export async function POST(request: Request) {
   return response;
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  if (!sameOrigin(request)) return NextResponse.json({error:'Origen no permitido'},{status:403});
   const response = NextResponse.json({ ok: true });
   response.cookies.delete("automega_admin_session");
   return response;

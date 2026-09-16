@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   if (!(await isAdminSession(request))) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  if (!sql) return NextResponse.json({ counts:{newQuotes:0,projects:0,services:0,images:0}, recent:[], settings:{} });
+  if (!sql) return NextResponse.json({error:'El resumen no está disponible. Inténtalo nuevamente.'},{status:503});
   try {
     const [quotes, projects, services, images, projectImages, settingImages, recent, settings] = await Promise.all([
       sql`SELECT count(*)::int AS count FROM quote_requests WHERE status='new'`,

@@ -47,9 +47,9 @@ const labels: Record<string, [string, string, string]> = {
 
 const statusLabel: Record<string, string> = { new: "Nueva", reviewed: "Revisada", contacted: "Contactada", closed: "Cerrada" };
 
-function SectionHeading({ section, count, visible }: { section: string; count: number; visible: number }) {
+function SectionHeading({ section, count, visible, loading, error }: { section: string; count: number; visible: number; loading: boolean; error: string }) {
   const title = labels[section] || ["Administración", "Gestiona el contenido del sitio.", "Panel administrativo"];
-  return <header className="admin-page-heading"><div><span className="admin-breadcrumb">Panel / {title[2]}</span><h1>{title[0]}</h1><p>{title[1]}</p></div><div className="admin-page-health"><span><i /> Sincronizado con Neon</span>{count > 0 && <small>{visible} de {count} publicados</small>}</div></header>;
+  return <header className="admin-page-heading"><div><span className="admin-breadcrumb">Panel / {title[2]}</span><h1>{title[0]}</h1><p>{title[1]}</p></div><div className="admin-page-health"><span className={error ? 'sync-error' : ''}><i />{loading ? 'Consultando datos…' : error ? 'Consulta pendiente' : 'Información actualizada'}</span>{!loading && !error && count > 0 && ['services','projects'].includes(section) && <small>{visible} de {count} publicados</small>}</div></header>;
 }
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
@@ -63,6 +63,7 @@ function MediaCard({ title, description, image, target, onUpload }: { title: str
 export default function AdminWorkspace({ section }: { section: string }) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [query, setQuery] = useState("");
   const [quoteFilter, setQuoteFilter] = useState("all");
   const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -71,6 +72,7 @@ export default function AdminWorkspace({ section }: { section: string }) {
 
   async function loadSection() {
     setLoading(true);
+    setLoadError('');
     try {
       if (!supabase) {
         const response = await fetch(`/api/admin/data?section=${section}`, { cache: "no-store" });
@@ -93,7 +95,7 @@ export default function AdminWorkspace({ section }: { section: string }) {
         if (error) throw error;
         setItems((data || []).map((row: any) => ({ ...row, title: row.alt_text || row.file_name, description: row.file_name, image_url: row.public_url })));
       }
-    } catch (error) { toast.error(error instanceof Error ? error.message : "No fue posible actualizar los datos"); }
+    } catch (error) { const message = error instanceof Error ? error.message : 'No fue posible actualizar los datos'; setLoadError(message); toast.error(message); }
     finally { setLoading(false); }
   }
 
@@ -143,7 +145,8 @@ export default function AdminWorkspace({ section }: { section: string }) {
 
   return <>
     <Toaster richColors position="top-right" />
-    <SectionHeading section={section} count={items.length} visible={visibleCount} />
+    <SectionHeading section={section} count={items.length} visible={visibleCount} loading={loading} error={loadError} />
+    {loadError && <div className="data-error-banner" role="alert"><span>{loadError}. Los datos no pudieron verificarse.</span><button className="button button-white" onClick={() => void loadSection()}>Reintentar</button></div>}
     {section === 'quotes' && <NotificationStatus/>}
     {loading && <div className="admin-loading"><span /> Sincronizando información…</div>}
 
