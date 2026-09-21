@@ -181,6 +181,91 @@ footer{background:#f8fafb}.footer-main{grid-template-columns:1.15fr .8fr 1fr;ali
   .footer-main{grid-template-columns:1fr;padding:32px 22px}.footer-brand{grid-column:auto}.footer-contact{justify-self:start}.footer-bottom{padding:14px 22px}
 }
 
+/* Dialogs — compact, photographic and consistent with the public site. */
+.project-viewer{
+  position:fixed;
+  inset:0;
+  width:min(1040px,94vw);
+  height:min(650px,88dvh);
+  max-width:none;
+  max-height:none;
+  padding:0;
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(320px,.72fr);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:20px;
+  background:#fff;
+  color:#111b2b;
+  box-shadow:0 32px 90px rgba(0,0,0,.42);
+}
+.project-viewer::backdrop{background:rgba(3,12,20,.84);backdrop-filter:blur(8px)}
+.project-viewer-media{position:relative;display:grid;place-items:center;min-width:0;height:100%;overflow:hidden;background:#0b1d2a}
+.project-viewer-backdrop{position:absolute;inset:-35px;width:calc(100% + 70px);height:calc(100% + 70px);object-fit:cover;filter:blur(24px) brightness(.42) saturate(.75);transform:scale(1.08)}
+.project-viewer-media::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,18,28,.18),transparent 45%,rgba(6,18,28,.24));pointer-events:none}
+.project-viewer-image{position:absolute;z-index:1;inset:0;display:block;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 18px 30px rgba(0,0,0,.26))}
+.project-viewer-details{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:48px 38px;background:#fff}
+.project-viewer-details .eyebrow{margin:0 0 15px;font-size:10px;letter-spacing:2.2px}
+.project-viewer-details h2{margin:0 0 15px;font-size:clamp(28px,2.5vw,38px);line-height:1.05;letter-spacing:-1.3px}
+.project-viewer-details p{display:block;margin:0 0 16px;color:#607086;font-size:14px;line-height:1.6}
+.project-viewer-details .project-viewer-location{display:flex;align-items:center;gap:8px;margin-top:3px;color:#33465b;font-weight:750}
+.project-viewer-location svg{flex:0 0 auto;color:#f17424}
+.project-viewer-details .button{align-self:flex-start;margin-top:14px;min-height:46px;padding-inline:19px;border:0;cursor:pointer}
+.project-viewer .viewer-close{position:absolute;z-index:6;top:15px;right:15px;width:42px;height:42px;border:1px solid rgba(255,255,255,.2);background:#0b1d2a;color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+
+.contact-overlay{padding:22px;background:rgba(3,12,20,.84);backdrop-filter:blur(8px)}
+.contact-overlay .contact-section{
+  width:min(980px,100%);
+  max-height:92dvh;
+  padding:0!important;
+  overflow:auto;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 32px 90px rgba(0,0,0,.42);
+}
+.contact-overlay .contact-section>.section-heading{margin:0;padding:25px 74px 22px 30px;background:#0b1d2a;color:#fff}
+.contact-overlay .contact-section>.section-heading .eyebrow{margin-bottom:9px;color:#ff8a2b}
+.contact-overlay .contact-section>.section-heading h2{margin:0 0 5px;color:#fff;font-size:32px;letter-spacing:-1.2px}
+.contact-overlay .contact-section>.section-heading p{margin:0;color:#b9c6d0;font-size:13px}
+.contact-overlay .contact-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0;margin:0;background:#fff}
+.contact-overlay .quote-form{padding:25px 28px 28px;border:0;border-radius:0;background:#fff;box-shadow:none}
+.contact-overlay .form-help{margin:0 0 15px;color:#76859a;font-size:11px}
+.contact-overlay .field-grid{gap:12px 14px}
+.contact-overlay .quote-form label{color:#45566d;font-size:12px;font-weight:750}
+.contact-overlay .quote-form input,.contact-overlay .quote-form select{height:46px;margin-top:6px;padding:0 13px;border-color:#d5dee6;border-radius:8px;background:#f9fbfc}
+.contact-overlay .quote-form textarea{height:104px;margin-top:6px;padding:12px 13px;resize:vertical;border-color:#d5dee6;border-radius:8px;background:#f9fbfc}
+.contact-overlay .submit-button{min-height:48px;margin-top:13px;border:0}
+.contact-overlay .contact-card{padding:30px 26px;border-radius:0;background:#102433;color:#fff}
+.contact-overlay .contact-card h3{margin-bottom:22px;color:#fff;font-size:22px;line-height:1.2}
+.contact-overlay .contact-line{gap:13px;margin:17px 0}
+.contact-overlay .contact-line>span{width:42px;height:42px;flex-basis:42px;border-radius:10px;background:#ff812d;color:#fff}
+.contact-overlay .contact-line>span.gray{background:#203849;color:#ffb02e}
+.contact-overlay .contact-line strong{overflow-wrap:anywhere;color:#fff;font-size:13px;line-height:1.35}
+.contact-overlay .contact-line small{margin-top:3px;color:#b9c6d0;font-size:11px;line-height:1.4}
+.contact-overlay .contact-card hr{margin:22px 0;border-color:rgba(255,255,255,.14)}
+.contact-overlay .quote-modal-close{top:15px!important;right:15px!important;width:42px;height:42px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;box-shadow:none}
+
+@media(max-width:760px){
+  .project-viewer{width:min(94vw,560px);height:auto;max-height:94dvh;grid-template-columns:1fr;overflow:auto;border-radius:15px}
+  .project-viewer-media{height:min(48dvh,410px);min-height:300px}
+  .project-viewer-details{justify-content:flex-start;padding:27px 23px 25px}
+  .project-viewer-details h2{font-size:29px}.project-viewer-details p{margin-bottom:11px}.project-viewer-details .button{width:100%;justify-content:center;margin-top:10px}
+  .project-viewer .viewer-close{top:11px;right:11px}
+  .contact-overlay{padding:10px}
+  .contact-overlay .contact-section{max-height:96dvh;border-radius:15px}
+  .contact-overlay .contact-section>.section-heading{padding:22px 62px 19px 20px}
+  .contact-overlay .contact-section>.section-heading h2{font-size:29px}
+  .contact-overlay .contact-grid{grid-template-columns:1fr}
+  .contact-overlay .quote-form{padding:21px 18px 24px}
+  .contact-overlay .contact-card{display:none}
+}
+
+@media(max-width:520px){
+  .project-viewer-media{height:42dvh;min-height:255px}.project-viewer-details{padding:23px 19px 21px}.project-viewer-details h2{font-size:26px}
+  .contact-overlay .field-grid{grid-template-columns:1fr}.contact-overlay .quote-form textarea{height:96px}
+}
+
 /* Public site — single source of truth matched to the approved reference. */
 .site-header{
   height:78px;
@@ -278,4 +363,24 @@ footer{background:#fff}.footer-main{max-width:1540px;margin:auto;grid-template-c
   .site-header{height:70px;padding-inline:17px}.brand-symbol{width:35px;height:38px;flex-basis:35px}.site-header .brand{gap:9px}.site-header .brand strong{font-size:20px}.site-header .brand small{margin-top:5px;font-size:5px;letter-spacing:2.1px}.site-header nav{top:70px}
   .hero{min-height:610px}.hero-copy{padding:98px 20px 102px}.hero h1{font-size:41px}.hero-copy>p{font-size:13px}.feature-strip{padding:14px 20px}.feature{padding:10px 0}
   #servicios>.section-heading,#proyectos>.section-heading{align-items:flex-start}.service-grid,.project-grid{grid-template-columns:1fr}.service-card{min-height:0}.service-media{height:175px}.about-grid{width:calc(100% - 40px);gap:28px}.about-copy h2{font-size:35px}.about-visual,.about-photo{min-height:290px;height:290px}.about-metrics{grid-template-columns:1fr}.coverage h2{font-size:34px}.project-photo{height:190px}.project-cta-band .button{width:100%}.footer-main{grid-template-columns:1fr;padding:24px 20px}.footer-main nav{justify-content:flex-start}.footer-bottom{padding:12px 20px}.contact-overlay{padding:10px}.contact-overlay .contact-section{max-height:96dvh;padding:24px 17px!important;border-radius:13px}.contact-overlay .contact-grid{grid-template-columns:1fr}.contact-overlay .contact-card{display:none}
+}
+
+/* Final dialog polish: remove nested frames and keep content visually balanced. */
+.project-viewer-details{overflow:hidden;background:linear-gradient(155deg,#fff 0%,#f5f8fa 100%)}
+.project-viewer-details::before{content:"AUTOMEGA";position:absolute;right:-13px;top:74px;color:rgba(11,29,42,.045);font-size:61px;font-weight:950;letter-spacing:-4px;transform:rotate(-90deg);pointer-events:none}
+.project-viewer-details::after{content:"";position:absolute;left:0;top:0;width:5px;height:100%;background:linear-gradient(#ff9d3d,#ff6f1f)}
+
+.contact-overlay{padding:22px!important;background:rgba(3,12,20,.86)!important}
+.contact-overlay .contact-section{width:min(980px,100%)!important;max-height:92dvh!important;padding:0!important;overflow:auto!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:20px!important;background:#fff!important;box-shadow:0 32px 90px rgba(0,0,0,.42)!important}
+.contact-overlay .contact-section>.section-heading{margin:0!important;padding:25px 74px 22px 30px!important;background:#0b1d2a!important;color:#fff!important}
+.contact-overlay .contact-section>.section-heading .eyebrow{margin-bottom:9px;color:#ff8a2b}
+.contact-overlay .contact-section>.section-heading h2{margin:0 0 5px;color:#fff;font-size:32px}
+.contact-overlay .contact-section>.section-heading p{margin:0;color:#b9c6d0;font-size:13px}
+.contact-overlay .contact-grid{display:grid!important;grid-template-columns:minmax(0,1fr) 300px!important;gap:0!important;margin:0!important;background:#fff}
+.contact-overlay .quote-form{padding:25px 28px 28px!important;border:0!important;border-radius:0!important;background:#fff!important;box-shadow:none!important}
+.contact-overlay .contact-card{display:block!important;padding:30px 26px!important;border-radius:0!important;background:#102433!important;color:#fff}
+.contact-overlay .quote-modal-close{position:absolute!important;z-index:10!important;top:15px!important;right:15px!important;display:grid!important;place-items:center!important;width:42px!important;height:42px!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:50%!important;background:#ff812d!important;color:#fff!important;box-shadow:0 8px 20px rgba(0,0,0,.2)!important}
+
+@media(max-width:760px){
+  .contact-overlay{padding:10px!important}.contact-overlay .contact-section{max-height:96dvh!important;border-radius:15px!important}.contact-overlay .contact-section>.section-heading{padding:22px 62px 19px 20px!important}.contact-overlay .contact-grid{grid-template-columns:1fr!important}.contact-overlay .quote-form{padding:21px 18px 24px!important}.contact-overlay .contact-card{display:none!important}
 }
