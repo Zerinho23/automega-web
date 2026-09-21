@@ -101,7 +101,9 @@ export default function Home() {
           <div className="eyebrow light">Gestión de tránsito temporal</div>
           <h1>{site.hero_title.includes("en cada vía") ? <>Seguridad y control <span>en cada vía</span></> : site.hero_title}</h1>
           <p>{site.hero_text}</p>
+          <ul className="hero-solutions" aria-label="Tipos de trabajo que atendemos"><li><CheckCircle2 /> Obras viales</li><li><CheckCircle2 /> Faenas</li><li><CheckCircle2 /> Desvíos temporales</li></ul>
           <div className="hero-actions"><a className="button button-yellow" href="#contacto">Solicitar cotización <ChevronRight size={20} /></a><a className="button button-outline" href="#servicios">Ver servicios <ChevronRight size={20} /></a></div>
+          <div className="hero-assurance" aria-label="Información comercial"><div><strong>Servicio integral</strong><span>Planificación, instalación y retiro</span></div><div><strong>Atención a empresas</strong><span>Soluciones ajustadas a cada obra</span></div></div>
         </div>
         <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/vial.png"} alt="" fetchPriority="high" decoding="async" /><div className="hero-photo-badge"><MapPin /><span><strong>Operación regional</strong><small>Concepción · Biobío</small></span></div></div>
       </section>
