@@ -35,7 +35,7 @@ export default function Home() {
   const [formState, setFormState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [services, setServices] = useState(defaultServices);
   const [projects, setProjects] = useState(defaultProjects);
-  const [site, setSite] = useState({ hero_title:"Seguridad y control en cada vía", hero_text:"Servicios de conificación y señalización vial temporal para obras, faenas y desvíos en Concepción y la Región del Biobío.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"diego.mora@automegaspa.com", coverage:"Concepción y toda la Región del Biobío", hero_image:"", about_image:"", logo_url:"" });
+  const [site, setSite] = useState({ hero_title:"Soluciones viales para un futuro más seguro", hero_text:"Conificación, señalización vial temporal y control del tránsito en Concepción y toda la Región del Biobío. Trabajamos con compromiso, experiencia y un equipo altamente capacitado.", about_title:"Seguridad vial para cada trabajo", phone:"+56 9 6647 3375", whatsapp:"+56 9 6647 3375", email:"diego.mora@automegaspa.com", coverage:"Concepción y toda la Región del Biobío", hero_image:"", about_image:"", logo_url:"" });
   const serviceImages = ["/images/vial.png", "/images/vial2.png", "/images/vial3.png", "/images/hero-automega-dusk.png"];
   const projectLocations = Array.from(new Set(projects.map(project => project.location?.trim()).filter(Boolean))) as string[];
 
@@ -97,16 +97,16 @@ export default function Home() {
           {[["Inicio", "#inicio"], ["Nosotros", "#nosotros"], ["Servicios", "#servicios"], ["Cobertura", "#cobertura"], ["Proyectos", "#proyectos"], ["Contacto", "#contacto"]].map(([label, href]) => <a key={label} href={href} className={activeSection === href.slice(1) ? "active-section" : ""} aria-current={activeSection === href.slice(1) ? "location" : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}
         </nav>
         <a className="header-phone" href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}><Phone size={16} /> {site.phone}</a>
-        <a className="button button-yellow header-cta" href="#contacto">Solicitar cotización <ChevronRight size={18} /></a>
+        <a className="button button-yellow header-cta" href="#contacto"><CalendarDays size={15} /> Solicitar cotización <ChevronRight size={16} /></a>
       </header>
 
       <section className="hero">
         <div className="hero-copy">
-          <div className="eyebrow light">Seguridad hoy, comunidades más conectadas</div>
-          <h1>{site.hero_title === "Soluciones viales para un futuro más seguro" ? <>Soluciones viales para un futuro <span>más seguro</span></> : site.hero_title.includes("en cada vía") ? <>Seguridad y control <span>en cada vía</span></> : site.hero_title}</h1>
+          <div className="eyebrow light"><span className="hero-eyebrow-icon"><ShieldCheck /></span>Seguridad hoy, comunidades más conectadas</div>
+          <h1>{site.hero_title === "Soluciones viales para un futuro más seguro" ? <><span className="hero-title-line">Soluciones viales</span><span className="hero-title-line">para un futuro</span><span className="hero-title-line hero-title-accent">más seguro</span></> : site.hero_title.includes("en cada vía") ? <>Seguridad y control <span>en cada vía</span></> : site.hero_title}</h1>
           <p>{site.hero_text}</p>
           <ul className="hero-solutions" aria-label="Tipos de trabajo que atendemos"><li><CheckCircle2 /> Obras viales</li><li><CheckCircle2 /> Faenas</li><li><CheckCircle2 /> Desvíos temporales</li></ul>
-          <div className="hero-actions"><a className="button button-yellow" href="#contacto">Solicitar cotización <ChevronRight size={20} /></a><a className="button button-outline" href="#servicios">Ver servicios <ChevronRight size={20} /></a></div>
+          <div className="hero-actions"><a className="button button-yellow" href="#contacto"><CalendarDays size={17} /> Solicitar cotización <ChevronRight size={18} /></a><a className="button button-outline" href="#servicios">Conocer nuestros servicios <ChevronRight size={18} /></a></div>
           <div className="hero-assurance" aria-label="Información comercial"><div><strong>Servicio integral</strong><span>Planificación, instalación y retiro</span></div><div><strong>Atención a empresas</strong><span>Soluciones ajustadas a cada obra</span></div></div>
         </div>
         <div className={`photo-crop hero-photo ${site.hero_image ? "custom-photo" : ""}`} role="img" aria-label="Operación de seguridad vial en una carretera de Concepción"><img src={site.hero_image || "/images/hero-automega-dusk.png"} alt="" fetchPriority="high" decoding="async" /><div className="hero-side-phrase">Vías seguras<br /><em>Personas primero</em></div><div className="hero-photo-badge"><span><strong>Trabajamos por ciudades</strong><small>más conectadas</small></span></div></div>
