@@ -384,3 +384,5 @@ footer{background:#fff}.footer-main{max-width:1540px;margin:auto;grid-template-c
 @media(max-width:760px){
   .contact-overlay{padding:10px!important}.contact-overlay .contact-section{max-height:96dvh!important;border-radius:15px!important}.contact-overlay .contact-section>.section-heading{padding:22px 62px 19px 20px!important}.contact-overlay .contact-grid{grid-template-columns:1fr!important}.contact-overlay .quote-form{padding:21px 18px 24px!important}.contact-overlay .contact-card{display:none!important}
 }
+
+.notification-status .notification-error-detail{max-width:920px;margin-top:7px;padding:8px 10px;border-radius:7px;background:#fff0ec;color:#a43720;font-weight:750;line-height:1.4}
