@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./design-upgrade.css";
+import "./reference-redesign.css";
 import MotionEnhancements from "@/components/motion-enhancements";
 
 export const metadata: Metadata = {
