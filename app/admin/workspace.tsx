@@ -141,7 +141,17 @@ export default function AdminWorkspace({ section }: { section: string }) {
     catch (error) { toast.error(error instanceof Error ? error.message : "No fue posible guardar la imagen"); }
     finally { setLoading(false); }
   }
-  async function updateQuoteStatus(id: string, status: string) { update(id, { status }); const response = await fetch("/api/admin/data", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ section: "quotes", id, status }) }); if (!response.ok) { toast.error("No fue posible actualizar el estado"); await loadSection(); return; } toast.success(`Solicitud marcada como ${statusLabel[status].toLowerCase()}`); }
+  async function updateQuoteStatus(id: string, status: string) {
+    update(id, { status });
+    try {
+      const response = await fetch("/api/admin/data", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ section: "quotes", id, status }) });
+      if (!response.ok) throw new Error("No fue posible actualizar el estado");
+      toast.success(`Solicitud marcada como ${statusLabel[status].toLowerCase()}`);
+    } catch {
+      toast.error("No fue posible actualizar el estado");
+      await loadSection();
+    }
+  }
   async function changePassword(form: FormData) { const password = String(form.get("password") || ""); const confirm = String(form.get("confirm") || ""); if (password.length < 8) { toast.error("La contraseña debe tener al menos 8 caracteres"); return; } if (password !== confirm) { toast.error("Las contraseñas no coinciden"); return; } setLoading(true); try { const response = await fetch("/api/admin/password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) }); const result: any = await response.json().catch(() => ({})); if (!response.ok) throw new Error(result.error || "No fue posible actualizar la contraseña"); toast.success("Contraseña actualizada de forma segura"); } catch (error) { toast.error(error instanceof Error ? error.message : "No fue posible actualizar la contraseña"); } finally { setLoading(false); } }
 
   return <>

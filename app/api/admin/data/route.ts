@@ -34,6 +34,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  if (!sameOrigin(request)) return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
   if (!(await isAdminSession(request)) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   let body: { section?: string; id?: string; status?: string; items?: any[]; settings?: Record<string, string>;notes?:string;owner?:string;date?:string };
   try { body = await readObject(request, 16_000_000) as typeof body; } catch { return NextResponse.json({error:'Datos inválidos'},{status:400}); }
