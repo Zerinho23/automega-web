@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/neon";
 import { isAdminSession } from "@/lib/admin-session";
-import { readObject } from "@/lib/request-security";
+import { readObject, sameOrigin } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 
@@ -79,11 +79,17 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  if (!sameOrigin(request)) return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
   if (!(await isAdminSession(request)) || !sql) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   let body: { section?: string; id?: string };
   try { body = await readObject(request, 2000) as typeof body; } catch { return NextResponse.json({error:'Datos inválidos'},{status:400}); }
-  if (!body.id || !["services", "projects", "images"].includes(body.section || "")) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+  if (!body.id || !["services", "projects", "images", "quotes"].includes(body.section || "") || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.id)) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
   try {
+    if (body.section === "quotes") {
+      const deleted = await sql`DELETE FROM quote_requests WHERE id=${body.id} RETURNING id`;
+      if (deleted.length === 0) return NextResponse.json({ error: "La cotización ya no existe" }, { status: 404 });
+      return NextResponse.json({ ok: true });
+    }
     if (body.section === "services") await sql`DELETE FROM services WHERE id=${body.id}`;
     if (body.section === "projects") await sql`DELETE FROM projects WHERE id=${body.id}`;
     if (body.section === "images") await sql`DELETE FROM site_images WHERE id=${body.id}`;

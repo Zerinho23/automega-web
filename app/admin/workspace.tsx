@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { createClient } from "@/lib/supabase/client";
-import QuoteFollowup from './quote-followup';
+import QuoteRecord from './quote-record';
 import NotificationStatus from './notification-status';
 
 type Item = {
@@ -66,6 +66,7 @@ export default function AdminWorkspace({ section }: { section: string }) {
   const [loadError, setLoadError] = useState('');
   const [query, setQuery] = useState("");
   const [quoteFilter, setQuoteFilter] = useState("all");
+  const [notificationVersion, setNotificationVersion] = useState(0);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const table = section === "services" ? "services" : section === "projects" ? "projects" : section === "quotes" ? "quote_requests" : "";
   const supabase = useMemo(() => createClient(), []);
@@ -147,7 +148,7 @@ export default function AdminWorkspace({ section }: { section: string }) {
     <Toaster richColors position="top-right" />
     <SectionHeading section={section} count={items.length} visible={visibleCount} loading={loading} error={loadError} />
     {loadError && <div className="data-error-banner" role="alert"><span>{loadError}. Los datos no pudieron verificarse.</span><button className="button button-white" onClick={() => void loadSection()}>Reintentar</button></div>}
-    {section === 'quotes' && <NotificationStatus/>}
+    {section === 'quotes' && <NotificationStatus key={notificationVersion}/>}
     {loading && <div className="admin-loading"><span /> Sincronizando información…</div>}
 
     {(section === "services" || section === "projects") && <>
@@ -158,7 +159,21 @@ export default function AdminWorkspace({ section }: { section: string }) {
       </div>{items.length > 0 && <div className="sticky-save-bar"><div><CheckCircle2 /><span><b>Cambios listos para publicar</b><small>Se actualizarán inmediatamente en el sitio.</small></span></div><button className="button button-yellow" disabled={loading} onClick={saveItems}><Save /> {loading ? "Guardando…" : "Guardar y publicar"}</button></div>}</section>
     </>}
 
-    {section === "quotes" && <><section className="module-metrics quotes-metrics"><article><span><Sparkles /></span><div><b>{quoteCounts.new}</b><small>Nuevas</small></div></article><article><span><Clock3 /></span><div><b>{quoteCounts.progress}</b><small>En seguimiento</small></div></article><article><span><CheckCircle2 /></span><div><b>{quoteCounts.closed}</b><small>Cerradas</small></div></article></section><section className="admin-card quotes-panel"><div className="data-toolbar"><div><span className="panel-kicker">Bandeja comercial</span><h2>Solicitudes recibidas</h2></div><div><input type="search" placeholder="Buscar cliente, correo o comuna…" value={query} onChange={event => setQuery(event.target.value)} /><select value={quoteFilter} onChange={event => setQuoteFilter(event.target.value)}><option value="all">Todos los estados</option><option value="new">Nuevas</option><option value="reviewed">Revisadas</option><option value="contacted">Contactadas</option><option value="closed">Cerradas</option></select></div></div>{filteredQuotes.length === 0 ? <div className="professional-empty"><MessageSquareText /><h3>{items.length ? "No hay resultados para este filtro" : "Aún no hay solicitudes"}</h3><p>{items.length ? "Prueba con otra búsqueda o selecciona todos los estados." : "Las cotizaciones enviadas desde el formulario aparecerán aquí automáticamente."}</p></div> : <div className="quote-list">{filteredQuotes.map(item => <article className="quote-record" key={item.id}><header><div className="quote-avatar">{(item.name || "A").slice(0, 2).toUpperCase()}</div><div><b>{item.name}</b><span>{item.company || "Cliente particular"}</span></div><select className={`status-select ${item.status}`} value={item.status} onChange={event => updateQuoteStatus(item.id, event.target.value)}><option value="new">Nueva</option><option value="reviewed">Revisada</option><option value="contacted">Contactada</option><option value="closed">Cerrada</option></select></header><div className="quote-record-grid"><span><Mail /> <a href={`mailto:${item.email}`}>{item.email}</a></span><span><Phone /> {item.phone || "Sin teléfono"}</span><span><MapPin /> {item.city}</span><span><CalendarDays /> {item.created_at ? new Date(item.created_at).toLocaleDateString("es-CL") : "Sin fecha"}</span></div><div className="quote-service"><small>Servicio solicitado</small><b>{item.service_name}</b></div><p>{item.message}</p><QuoteFollowup item={item}/></article>)}</div>}</section></>}
+    {section === "quotes" && <>
+      <section className="module-metrics quotes-metrics">
+        <article><span><Sparkles /></span><div><b>{quoteCounts.new}</b><small>Nuevas</small></div></article>
+        <article><span><Clock3 /></span><div><b>{quoteCounts.progress}</b><small>En seguimiento</small></div></article>
+        <article><span><CheckCircle2 /></span><div><b>{quoteCounts.closed}</b><small>Cerradas</small></div></article>
+      </section>
+      <section className="admin-card quotes-panel">
+        <div className="data-toolbar">
+          <div><span className="panel-kicker">Bandeja comercial</span><h2>Solicitudes recibidas</h2><p className="quote-results">{filteredQuotes.length} de {items.length} {items.length === 1 ? "solicitud" : "solicitudes"}</p></div>
+          <div><input type="search" aria-label="Buscar cotizaciones" placeholder="Buscar cliente, correo o comuna…" value={query} onChange={event => setQuery(event.target.value)} /><select aria-label="Filtrar cotizaciones por estado" value={quoteFilter} onChange={event => setQuoteFilter(event.target.value)}><option value="all">Todos los estados</option><option value="new">Nuevas</option><option value="reviewed">Revisadas</option><option value="contacted">Contactadas</option><option value="closed">Cerradas</option></select></div>
+        </div>
+        {filteredQuotes.length === 0 ? <div className="professional-empty"><MessageSquareText /><h3>{items.length ? "No hay resultados para este filtro" : "Aún no hay solicitudes"}</h3><p>{items.length ? "Prueba con otra búsqueda o selecciona todos los estados." : "Las cotizaciones enviadas desde el formulario aparecerán aquí automáticamente."}</p></div> :
+          <div className={`quote-list ${filteredQuotes.length === 1 ? "quote-list-single" : ""}`}>{filteredQuotes.map(item => <QuoteRecord key={item.id} item={item} onStatusChange={updateQuoteStatus} onDeleted={id => { setItems(list => list.filter(quote => quote.id !== id)); setNotificationVersion(version => version + 1); }} />)}</div>}
+      </section>
+    </>}
 
     {section === "images" && <><section className="module-metrics"><article><span><ImageIcon /></span><div><b>{items.length}</b><small>Archivos disponibles</small></div></article><article><span><BadgeCheck /></span><div><b>{visibleCount}</b><small>Imágenes activas</small></div></article><article><span><ShieldCheck /></span><div><b>4 MB</b><small>Tamaño máximo</small></div></article></section><section className="admin-card media-library"><div className="editor-toolbar"><div><span className="panel-kicker">Gestor de archivos</span><h2>Biblioteca multimedia</h2><p>Usa nombres descriptivos para identificar cada recurso con facilidad.</p></div></div><label className="upload-zone pro-upload-zone"><span className="upload-icon"><Upload /></span><strong>Arrastra o selecciona una imagen</strong><span>PNG, JPG o WebP · máximo 4 MB</span><em>Seleccionar archivo</em><input type="file" accept="image/png,image/jpeg,image/webp" onChange={event => uploadImage(event.target.files?.[0])} /></label>{items.length === 0 ? <div className="professional-empty compact-empty"><ImageIcon /><h3>La biblioteca está vacía</h3><p>Las imágenes que cargues quedarán disponibles y almacenadas en Neon.</p></div> : <div className="image-admin-grid pro-image-grid">{items.map(item => <article key={item.id}>{item.image_url ? <img src={item.image_url} alt={item.title} /> : <div className="image-placeholder"><ImageIcon /></div>}<div className="image-card-meta"><div><b>{item.title}</b><small>{item.created_at ? new Date(item.created_at).toLocaleDateString("es-CL") : "Imagen del sitio"}</small></div><button aria-label="Eliminar imagen" onClick={() => removeItem(item.id)}><Trash2 /></button></div></article>)}</div>}</section></>}
 
