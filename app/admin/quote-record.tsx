@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Mail, MapPin, Phone, Trash2 } from "lucide-react";
+import { CalendarDays, ChevronDown, Mail, MapPin, Phone, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import QuoteFollowup from "./quote-followup";
@@ -29,6 +29,7 @@ export default function QuoteRecord({ item, onStatusChange, onDeleted }: {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [savingStatus, setSavingStatus] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const name = item.name || "Cliente sin nombre";
   const created = item.created_at ? new Date(item.created_at).toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" }) : "Sin fecha";
 
@@ -50,23 +51,23 @@ export default function QuoteRecord({ item, onStatusChange, onDeleted }: {
     }
   }
 
-  return <article className="quote-record">
-    <header className="quote-record-head">
-      <div className="quote-identity"><span className="quote-avatar">{name.slice(0, 2).toUpperCase()}</span><span><b>{name}</b><small>{item.company || "Cliente particular"}</small></span></div>
-      <div className="quote-record-actions">
-        <label className="sr-only" htmlFor={`quote-status-${item.id}`}>Estado de la cotización de {name}</label>
-        <select id={`quote-status-${item.id}`} className={`status-select ${item.status || "new"}`} value={item.status || "new"} disabled={savingStatus || deleting} onChange={async event => { setSavingStatus(true); try { await onStatusChange(item.id, event.target.value); } finally { setSavingStatus(false); } }}><option value="new">Nueva</option><option value="reviewed">Revisada</option><option value="contacted">Contactada</option><option value="closed">Cerrada</option></select>
-        <button className="quote-delete-trigger" type="button" disabled={deleting} onClick={() => setConfirming(true)} aria-label={`Eliminar cotización de ${name}`}><Trash2 size={16} /><span>Eliminar</span></button>
-      </div>
-    </header>
-    <div className="quote-contact-grid">
-      <a href={`mailto:${item.email || ""}`}><Mail /><span><small>Correo</small><b>{item.email || "Sin correo"}</b></span></a>
-      <a href={`tel:${(item.phone || "").replace(/[^\d+]/g, "")}`}><Phone /><span><small>Teléfono</small><b>{item.phone || "Sin teléfono"}</b></span></a>
-      <div><MapPin /><span><small>Comuna</small><b>{item.city || "Sin comuna"}</b></span></div>
-      <div><CalendarDays /><span><small>Recibida</small><b>{created}</b></span></div>
+  return <article className={`quote-entry${expanded ? " is-open" : ""}`}>
+    <div className="quote-entry-row">
+      <div className="quote-entry-person"><span className="quote-avatar">{name.slice(0, 2).toUpperCase()}</span><span><b>{name}</b><small>{item.company || "Cliente particular"}</small></span></div>
+      <div className="quote-entry-service"><b>{item.service_name || "Sin especificar"}</b><small>{item.message || "Sin mensaje"}</small></div>
+      <div className="quote-entry-place"><MapPin aria-hidden="true" />{item.city || "Sin comuna"}</div>
+      <time className="quote-entry-date" dateTime={item.created_at || undefined}>{created}</time>
+      <select aria-label={`Estado de la cotización de ${name}`} className={`status-select ${item.status || "new"}`} value={item.status || "new"} disabled={savingStatus || deleting} onChange={async event => { setSavingStatus(true); try { await onStatusChange(item.id, event.target.value); } finally { setSavingStatus(false); } }}><option value="new">Nueva</option><option value="reviewed">Revisada</option><option value="contacted">Contactada</option><option value="closed">Cerrada</option></select>
+      <button className="quote-entry-toggle" type="button" aria-expanded={expanded} aria-controls={`quote-details-${item.id}`} onClick={() => setExpanded(value => !value)}><span>{expanded ? "Cerrar" : "Ver detalle"}</span><ChevronDown aria-hidden="true" /></button>
     </div>
-    <div className="quote-request-details"><div className="quote-service"><small>Servicio solicitado</small><b>{item.service_name || "Sin especificar"}</b></div><div className="quote-message"><small>Mensaje del cliente</small><p>{item.message || "Sin mensaje"}</p></div></div>
-    <QuoteFollowup item={item} />
-    {confirming && <div className="quote-delete-confirm" role="group" aria-label={`Confirmar eliminación de la cotización de ${name}`}><div><b>¿Eliminar esta cotización?</b><p>Se borrarán la solicitud, sus notas internas y el historial de avisos por correo. Esta acción no se puede deshacer.</p></div><div><button type="button" className="button button-white" disabled={deleting} onClick={() => setConfirming(false)}>Cancelar</button><button type="button" className="button quote-delete-confirm-button" disabled={deleting} onClick={deleteQuote}><Trash2 size={16} /> {deleting ? "Eliminando…" : "Sí, eliminar"}</button></div></div>}
+    <div className="quote-entry-details" id={`quote-details-${item.id}`} hidden={!expanded}>
+      <div className="quote-entry-detail-grid">
+        <div className="quote-entry-message"><h3>Mensaje del cliente</h3><p>{item.message || "Sin mensaje"}</p></div>
+        <div className="quote-entry-contact"><h3>Datos de contacto</h3><a href={`mailto:${item.email || ""}`} title={item.email}><Mail />{item.email || "Sin correo"}</a><a href={`tel:${(item.phone || "").replace(/[^\d+]/g, "")}`}><Phone />{item.phone || "Sin teléfono"}</a><span><MapPin />{item.city || "Sin comuna"}</span><span><CalendarDays />{created}</span></div>
+      </div>
+      <QuoteFollowup item={item} />
+      <div className="quote-entry-footer"><span>La eliminación borra también las notas y avisos de correo asociados.</span><button className="quote-delete-trigger" type="button" disabled={deleting} onClick={() => setConfirming(true)}><Trash2 size={16} /> Eliminar cotización</button></div>
+      {confirming && <div className="quote-delete-confirm" role="group" aria-label={`Confirmar eliminación de la cotización de ${name}`}><div><b>¿Eliminar la cotización de {name}?</b><p>Esta acción no se puede deshacer.</p></div><div><button type="button" className="button button-white" disabled={deleting} onClick={() => setConfirming(false)}>Cancelar</button><button type="button" className="button quote-delete-confirm-button" disabled={deleting} onClick={deleteQuote}><Trash2 size={16} /> {deleting ? "Eliminando…" : "Sí, eliminar"}</button></div></div>}
+    </div>
   </article>;
 }

@@ -66,6 +66,7 @@ export default function AdminWorkspace({ section }: { section: string }) {
   const [loadError, setLoadError] = useState('');
   const [query, setQuery] = useState("");
   const [quoteFilter, setQuoteFilter] = useState("all");
+  const [quotePage, setQuotePage] = useState(1);
   const [notificationVersion, setNotificationVersion] = useState(0);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const table = section === "services" ? "services" : section === "projects" ? "projects" : section === "quotes" ? "quote_requests" : "";
@@ -113,6 +114,10 @@ export default function AdminWorkspace({ section }: { section: string }) {
     progress: items.filter(item => item.status === "reviewed" || item.status === "contacted").length,
     closed: items.filter(item => item.status === "closed").length,
   };
+  const quotePageSize = 10;
+  const quotePages = Math.max(1, Math.ceil(filteredQuotes.length / quotePageSize));
+  const currentQuotePage = Math.min(quotePage, quotePages);
+  const displayedQuotes = filteredQuotes.slice((currentQuotePage - 1) * quotePageSize, currentQuotePage * quotePageSize);
 
   function update(id: string, patch: Partial<Item>) { setItems(list => list.map(item => item.id === id ? { ...item, ...patch } : item)); }
   function updateSetting(key: keyof Settings, value: string) { setSettings(current => ({ ...current, [key]: value })); }
@@ -177,11 +182,13 @@ export default function AdminWorkspace({ section }: { section: string }) {
       </section>
       <section className="admin-card quotes-panel">
         <div className="data-toolbar">
-          <div><span className="panel-kicker">Bandeja comercial</span><h2>Solicitudes recibidas</h2><p className="quote-results">{filteredQuotes.length} de {items.length} {items.length === 1 ? "solicitud" : "solicitudes"}</p></div>
-          <div><input type="search" aria-label="Buscar cotizaciones" placeholder="Buscar cliente, correo o comuna…" value={query} onChange={event => setQuery(event.target.value)} /><select aria-label="Filtrar cotizaciones por estado" value={quoteFilter} onChange={event => setQuoteFilter(event.target.value)}><option value="all">Todos los estados</option><option value="new">Nuevas</option><option value="reviewed">Revisadas</option><option value="contacted">Contactadas</option><option value="closed">Cerradas</option></select></div>
+          <div><span className="panel-kicker">Bandeja comercial</span><h2>Solicitudes recibidas</h2><p className="quote-results">{query || quoteFilter !== "all" ? `${filteredQuotes.length} de ${items.length}` : items.length} {items.length === 1 ? "solicitud" : "solicitudes"}</p></div>
+          <div><input type="search" aria-label="Buscar cotizaciones" placeholder="Buscar cliente, correo o comuna…" value={query} onChange={event => { setQuery(event.target.value); setQuotePage(1); }} /><select aria-label="Filtrar cotizaciones por estado" value={quoteFilter} onChange={event => { setQuoteFilter(event.target.value); setQuotePage(1); }}><option value="all">Todos los estados</option><option value="new">Nuevas</option><option value="reviewed">Revisadas</option><option value="contacted">Contactadas</option><option value="closed">Cerradas</option></select></div>
         </div>
-        {filteredQuotes.length === 0 ? <div className="professional-empty"><MessageSquareText /><h3>{items.length ? "No hay resultados para este filtro" : "Aún no hay solicitudes"}</h3><p>{items.length ? "Prueba con otra búsqueda o selecciona todos los estados." : "Las cotizaciones enviadas desde el formulario aparecerán aquí automáticamente."}</p></div> :
-          <div className={`quote-list ${filteredQuotes.length === 1 ? "quote-list-single" : ""}`}>{filteredQuotes.map(item => <QuoteRecord key={item.id} item={item} onStatusChange={updateQuoteStatus} onDeleted={id => { setItems(list => list.filter(quote => quote.id !== id)); setNotificationVersion(version => version + 1); }} />)}</div>}
+        {filteredQuotes.length === 0 ? <div className="professional-empty"><MessageSquareText /><h3>{items.length ? "No hay resultados para este filtro" : "Aún no hay solicitudes"}</h3><p>{items.length ? "Prueba con otra búsqueda o selecciona todos los estados." : "Las cotizaciones enviadas desde el formulario aparecerán aquí automáticamente."}</p></div> : <>
+          <div className="quote-inbox"><div className="quote-inbox-head" aria-hidden="true"><span>Cliente</span><span>Servicio y mensaje</span><span>Comuna</span><span>Fecha</span><span>Estado</span><span>Detalle</span></div><div className="quote-list">{displayedQuotes.map(item => <QuoteRecord key={item.id} item={item} onStatusChange={updateQuoteStatus} onDeleted={id => { setItems(list => list.filter(quote => quote.id !== id)); setNotificationVersion(version => version + 1); }} />)}</div></div>
+          {quotePages > 1 && <nav className="quote-pagination" aria-label="Páginas de cotizaciones"><button type="button" disabled={currentQuotePage === 1} onClick={() => setQuotePage(page => Math.max(1, page - 1))}>Anterior</button><span>Página {currentQuotePage} de {quotePages}</span><button type="button" disabled={currentQuotePage === quotePages} onClick={() => setQuotePage(page => Math.min(quotePages, page + 1))}>Siguiente</button></nav>}
+        </>}
       </section>
     </>}
 
