@@ -386,3 +386,24 @@ footer{background:#fff}.footer-main{max-width:1540px;margin:auto;grid-template-c
 }
 
 .notification-status .notification-error-detail{max-width:920px;margin-top:7px;padding:8px 10px;border-radius:7px;background:#fff0ec;color:#a43720;font-weight:750;line-height:1.4}
+
+/* Keep the photo caption legible and contained within the image at every size. */
+.about-photo{position:relative;isolation:isolate;overflow:hidden}
+.about-photo::after{z-index:1;inset:auto 0 0;height:42%;background:linear-gradient(0deg,rgba(5,17,27,.88),rgba(5,17,27,0));pointer-events:none}
+.about-photo .about-quote{position:absolute;z-index:2;left:20px;right:20px;bottom:17px;display:flex;align-items:flex-start;gap:10px;max-width:none;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none}
+.about-photo .about-quote::before{content:none}
+.about-quote-mark{flex:none;color:#ff9b43!important;font-size:37px!important;font-weight:800;line-height:.9!important}
+.about-photo .about-quote p{display:flex;flex-direction:column;gap:2px;margin:0;color:#fff;font-size:13px;line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+.about-photo .about-quote strong,.about-photo .about-quote p span{display:block;margin:0;color:#fff;font-size:13px;line-height:1.25}
+
+/* A coverage locator, not an invented geographic outline. */
+.coverage-region{position:relative;z-index:2;align-self:center;justify-self:center;width:230px;height:190px;overflow:hidden;border:1px solid rgba(255,255,255,.15);border-radius:14px;background:radial-gradient(circle at 50% 43%,rgba(255,138,43,.18),transparent 46%),rgba(7,25,38,.56);box-shadow:inset 0 0 28px rgba(0,0,0,.13)}
+.coverage-region-ring{position:absolute;left:50%;top:42%;border:1px solid rgba(255,255,255,.19);border-radius:50%;transform:translate(-50%,-50%)}
+.coverage-region-ring-outer{width:176px;height:176px}.coverage-region-ring-inner{width:104px;height:104px;border-color:rgba(255,154,71,.52)}
+.coverage-region-route{position:absolute;width:6px;height:6px;border-radius:50%;background:#ff9a43;box-shadow:0 0 0 4px rgba(255,154,67,.13)}
+.coverage-region-route-one{left:28px;top:71px}.coverage-region-route-two{right:35px;top:40px}.coverage-region-route-three{right:46px;top:117px}
+.coverage-region-pin{position:absolute;left:50%;top:42%;display:grid;place-items:center;width:46px;height:46px;border:1px solid rgba(255,255,255,.8);border-radius:50%;background:#ff8a2b;color:#0b1d2a;box-shadow:0 8px 25px rgba(255,112,35,.34);transform:translate(-50%,-50%)}
+.coverage-region-pin svg{width:23px;height:23px;stroke-width:2.5}
+.coverage-region-label{position:absolute;right:12px;bottom:12px;left:12px;display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;font-size:11px;font-weight:900;letter-spacing:1.2px;text-align:center}.coverage-region-label small{color:#ffbd88;font-size:9px;font-weight:750;letter-spacing:1px}
+@media(max-width:1250px){.coverage-region{width:200px}}
+@media(max-width:880px){.coverage-region{display:none}}
